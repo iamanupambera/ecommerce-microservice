@@ -25,6 +25,7 @@ model Auth {
   createdAt              DateTime @default(now())
   passwordResetToken     String?
   passwordResetExpires   DateTime @default(now())
+  deleted                Boolean?
 
   @@index(fields: [username, email, id])
 }

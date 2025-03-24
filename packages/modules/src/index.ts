@@ -5,3 +5,5 @@ export {
 } from './logger';
 
 export { ExceptionFilter } from './filter/index';
+
+export { ServiceNameENUM } from './shared/index';
