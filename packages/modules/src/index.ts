@@ -3,3 +3,5 @@ export {
   type LoggerModuleOptions,
   LoggerService,
 } from './logger';
+
+export { ExceptionFilter } from './filter/index';

@@ -1,4 +1,4 @@
-import { LoggerService } from '@repo/modules/index';
+import { ExceptionFilter, LoggerService } from '@repo/modules/index';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
@@ -11,6 +11,17 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.getOrThrow('AUTH_SERVICE_PORT');
 
+  // Validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: false,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  app.useGlobalFilters(new ExceptionFilter());
+
   app.connectMicroservice<MicroserviceOptions>(
     {
       transport: Transport.TCP,
@@ -20,15 +31,6 @@ async function bootstrap() {
       },
     },
     { inheritAppConfig: true },
-  );
-
-  // Validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      disableErrorMessages: false,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }),
   );
 
   await app.startAllMicroservices();
