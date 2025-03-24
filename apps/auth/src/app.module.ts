@@ -17,7 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
       injects: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connectionUrl: configService.getOrThrow('ELASTIC_SEARCH_URL'),
-        name: 'auth',
+        name: 'auth service',
         level: 'debug',
       }),
     }),

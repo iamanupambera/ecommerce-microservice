@@ -70,9 +70,9 @@ function setupApplicationMiddleware(app: NestExpressApplication) {
 
 function setupCors(app: NestExpressApplication, configService: ConfigService) {
   app.enableCors({
-    origin: [configService.getOrThrow<string>('CLIENT_URL', { infer: true })], // Frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Allowed HTTP methods
-    credentials: true, // Include credentials in cross-origin requests
+    origin: [configService.getOrThrow<string>('CLIENT_URL')],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
   });
 }
 

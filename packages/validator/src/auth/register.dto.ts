@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class RegisterDto {
   @IsNotEmpty()
@@ -29,11 +23,11 @@ export class RegisterDto {
   @IsString()
   profilePicture: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  browserName?: string;
+  browserName: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  deviceType?: string;
+  deviceType: string;
 }
