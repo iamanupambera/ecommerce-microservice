@@ -56,7 +56,7 @@ function setupApplicationMiddleware(app: NestExpressApplication) {
   app.use(cookieParser());
 
   // Global prefix for APIs
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/gateway/v1');
 
   // Validation pipe
   app.useGlobalPipes(
