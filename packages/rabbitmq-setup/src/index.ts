@@ -5,7 +5,7 @@ import path from 'path';
 dotenv.config({ path: [path.resolve(__dirname, '../../../.env'), '.env'] });
 
 async function connectToRabbitMQ() {
-  const rabbitMQUrl = process.env.RABBITMQ_ENDPOINT || '';
+  const rabbitMQUrl = process.env.RABBITMQ_ENDPOINT;
 
   if (!rabbitMQUrl) {
     throw new Error('Connection url missing');
@@ -38,17 +38,13 @@ async function setupExchangeAndQueue(
 }
 
 async function setupNotificationService(channel: amqp.Channel) {
-  const exchangeName = 'jobber-email-notification';
-  const routingKey = 'auth-email';
-  const queueName = 'auth-email-queue';
+  const exchangeName = process.env.NOTIFICATION_SERVICE_EXCHANGE;
+  const routingKey = process.env.NOTIFICATION_ROUTING_KEY;
+  const queueName = process.env.NOTIFICATION_SERVICE_QUEUE;
 
-  await setupExchangeAndQueue(channel, exchangeName, queueName, routingKey);
-}
-
-async function setupAuthService(channel: amqp.Channel) {
-  const exchangeName = 'jobber-auth-service';
-  const routingKey = 'auth-email';
-  const queueName = 'auth-email-queue';
+  if (!exchangeName || !routingKey || !queueName) {
+    throw new Error('Notification service details queue details missing');
+  }
 
   await setupExchangeAndQueue(channel, exchangeName, queueName, routingKey);
 }
@@ -58,7 +54,6 @@ async function setupRabbitMQ() {
     const { connection, channel } = await connectToRabbitMQ();
 
     await setupNotificationService(channel);
-    await setupAuthService(channel);
 
     console.log('RabbitMQ setup completed.');
     await channel.close();

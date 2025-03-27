@@ -1,14 +1,17 @@
 import crypto from 'crypto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { RegisterDto } from '@repo/validator/index';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private configService: ConfigService,
+    @Inject('NOTIFICATION_SERVICE')
+    private readonly notificationService: ClientProxy,
   ) {}
 
   async register({
@@ -52,13 +55,27 @@ export class AuthService {
     };
 
     // send mail to user to verify email
-    // await publishDirectMessage(
-    //   authChannel,
-    //   'jobber-email-notification',
-    //   'auth-email',
-    //   JSON.stringify(messageDetails),
-    //   'Verify email message has been sent to notification service.',
-    // );
+    this.notificationService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'auth_email_controller', cmd: 'otpEmail' },
+        {
+          userToken: null,
+          serviceToken: '',
+          payload: messageDetails,
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (err) => console.error('Error sending email:', err),
+      });
 
     return {
       message: 'User created successfully',

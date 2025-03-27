@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoggerModule } from '@repo/modules/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
+import { LoggerModule } from '@repo/modules/index';
+import { AuthEmailModule } from './auth-email/auth-email.module';
+import { OrderEmailModule } from './order-email/order-email.module';
 
 @Module({
   imports: [
@@ -16,11 +17,12 @@ import { AuthModule } from './modules/auth/auth.module';
       injects: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connectionUrl: configService.getOrThrow('ELASTIC_SEARCH_URL'),
-        name: 'auth service',
+        name: 'notification service',
         level: 'debug',
       }),
     }),
-    AuthModule,
+    AuthEmailModule,
+    OrderEmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -29,7 +29,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^6.5.0",
-    "@repo/modules": "*",
+    "@repo/modules": "^0.0.0",
     "@repo/validator": "^0.0.0",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.5",

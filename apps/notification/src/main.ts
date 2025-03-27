@@ -9,7 +9,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
-  const port = configService.getOrThrow('AUTH_SERVICE_PORT');
+  const port = configService.getOrThrow('NOTIFICATION_SERVICE_PORT');
+  const RMQUrl = configService.getOrThrow('RABBITMQ_ENDPOINT');
+  const RMQQueue = configService.getOrThrow('NOTIFICATION_SERVICE_QUEUE');
 
   // Validation pipe
   app.useGlobalPipes(
@@ -24,19 +26,23 @@ async function bootstrap() {
 
   app.connectMicroservice<MicroserviceOptions>(
     {
-      transport: Transport.TCP,
+      transport: Transport.RMQ,
       options: {
-        host: '127.0.0.1',
-        port,
+        urls: [RMQUrl],
+        queue: RMQQueue,
+        queueOptions: {
+          durable: false,
+          autoDelete: false,
+        },
       },
     },
     { inheritAppConfig: true },
   );
 
   await app.startAllMicroservices();
-  await app.listen(4002);
+  await app.listen(port);
   const logger = app.get(LoggerService);
-  logger.log('info', 'Auth server running');
+  logger.log('info', 'Notification server running');
 }
 
 bootstrap();
