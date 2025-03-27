@@ -7,8 +7,8 @@ Accept: application/json
 withCredentials: true
 
 {
-  "username": "sunny8",
-  "email": "sunny8@test.com",
+  "username": "anupam5",
+  "email": "anupam+5@pitangent.com",
   "password": "qwerty",
   "country": "Germany",
   "browserName": "test",

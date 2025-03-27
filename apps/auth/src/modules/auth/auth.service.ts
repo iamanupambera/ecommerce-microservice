@@ -2,8 +2,9 @@ import crypto from 'crypto';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { RegisterDto } from '@repo/validator/index';
 import { AuthRepository } from './auth.repository';
-import { ConfigService } from '@nestjs/config';
 import { ClientProxy } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
+import { CommonErrors } from '@repo/modules/index';
 
 @Injectable()
 export class AuthService {
@@ -27,16 +28,13 @@ export class AuthService {
       (await this.authRepository.findByUsername(username)) ||
       (await this.authRepository.findByEmail(email))
     ) {
-      throw new BadRequestException({
-        response: 'Invalid credentials. Email or Username',
-        message: 'SignUp create() method error',
-      });
+      throw new BadRequestException(CommonErrors.UserAleradyExists);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
-    const authData = {
+    const result = await this.authRepository.create({
       username,
-      email: email,
+      email,
       profilePublicId: '13vuhbk',
       password,
       country,
@@ -44,15 +42,7 @@ export class AuthService {
       emailVerificationToken: randomCharacters,
       browserName,
       deviceType,
-    };
-    const result = await this.authRepository.create(authData);
-
-    const verificationLink = `${this.configService.getOrThrow('CLIENT_URL')}/confirm_email?v_token=${authData.emailVerificationToken}`;
-    const messageDetails = {
-      receiverEmail: result.email,
-      verifyLink: verificationLink,
-      template: 'verifyEmail',
-    };
+    });
 
     // send mail to user to verify email
     this.notificationService
@@ -69,7 +59,10 @@ export class AuthService {
         {
           userToken: null,
           serviceToken: '',
-          payload: messageDetails,
+          payload: {
+            receiverEmail: email,
+            verifyLink: `${this.configService.getOrThrow('CLIENT_URL')}/confirm_email?v_token=${randomCharacters}`,
+          },
           user: null,
         },
       )
@@ -78,9 +71,9 @@ export class AuthService {
       });
 
     return {
+      statusCode: 201,
+      response: result,
       message: 'User created successfully',
-      user: result,
-      messageDetails,
     };
   }
 }

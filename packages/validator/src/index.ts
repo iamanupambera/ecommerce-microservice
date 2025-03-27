@@ -5,3 +5,5 @@ export {
   PasswordDTO,
   RegisterDto,
 } from './auth';
+
+export { VerifyEmailDto } from './notification';
