@@ -9,23 +9,118 @@ datasource db {
 }
 
 model Auth {
-  id                     Int       @id @default(autoincrement())
-  username               String    @unique
-  password               String
-  profilePublicId        String
-  email                  String    @unique
-  country                String
-  profilePicture         String
-  emailVerificationToken String?   @unique
-  emailVerified          Boolean   @default(false)
-  browserName            String
-  deviceType             String
-  otp                    String?
-  otpExpiration          DateTime  @default(now())
-  createdAt              DateTime  @default(now())
-  passwordResetToken     String?
-  passwordResetExpires   DateTime  @default(now())
-  deletedAt              DateTime? @db.Timestamp
+  id              Int       @id @default(autoincrement())
+  username        String
+  password        Password?
+  profilePublicId String
+  email           String
+  country         String
+  profilePicture  String
+  emailVerified   Boolean   @default(false)
+  browserName     String
+  deviceType      String
+  lastActiveAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime? @db.Timestamp
 
+  // identityProvider     IdentityProvider      @default(CAL)
+  // apiKeys              ApiKey[]
+  sessions             Session[]
+  verifiedEmail        VerifiedEmail?
+  resetPasswordRequest ResetPasswordRequest?
+  otp                  OTP?
+
+  @@unique([email])
+  @@unique([username])
   @@index(fields: [username, email, id])
 }
+
+// It holds the password of a User, separate from the Auth model to avoid leaking the password hash
+model Password {
+  id     Int    @id @default(autoincrement())
+  hash   String
+  authId Int
+  auth   Auth   @relation(fields: [authId], references: [id], onDelete: Cascade)
+
+  @@unique([authId])
+  @@index([authId])
+}
+
+model ResetPasswordRequest {
+  authId    Int      @id
+  auth      Auth     @relation(fields: [authId], references: [id], onDelete: Cascade)
+  token     String
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([authId])
+  @@index([authId])
+}
+
+// model ApiKey {
+//   id         Int         @id @default(autoincrement())
+//   lastUsedAt DateTime?
+//   hashedKey  String      @unique()
+//   createdAt  DateTime    @default(now())
+//   expiresAt  DateTime?
+//   authId     Int
+//   auth       Auth?       @relation(fields: [authId], references: [id], onDelete: Cascade)
+//   rateLimits RateLimit[]
+
+//   @@index([authId])
+// }
+
+// model RateLimit {
+//   id            Int      @id @default(autoincrement())
+//   name          String
+//   apiKeyId      Int
+//   ttl           Int
+//   limit         Int
+//   blockDuration Int
+//   createdAt     DateTime @default(now())
+//   updatedAt     DateTime @updatedAt
+//   apiKey        ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+//   @@index([apiKeyId])
+// }
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  refreshToken String?  @db.Text
+  accessToken  String?  @db.Text
+  authId       Int
+  auth         Auth?    @relation(fields: [authId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([authId])
+}
+
+model VerifiedEmail {
+  id                     Int     @id @default(autoincrement())
+  emailVerificationToken String?
+  authId                 Int?
+  auth                   Auth?   @relation(fields: [authId], references: [id], onDelete: Cascade)
+
+  @@unique([authId])
+  @@index([authId])
+}
+
+model OTP {
+  id      Int      @id @default(autoincrement())
+  otp     String?
+  expires DateTime
+  authId  Int?
+  auth    Auth?    @relation(fields: [authId], references: [id], onDelete: Cascade)
+
+  @@unique([authId])
+  @@index([authId])
+}
+
+// enum IdentityProvider {
+//   CAL
+//   GOOGLE
+//   SAML
+// }

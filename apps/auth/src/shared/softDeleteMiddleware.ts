@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 
 export const softDeleteMiddleware = Prisma.defineExtension({
   query: {
-    $allModels: {
+    auth: {
       // Apply to all models
       async $allOperations({ operation, args, query }) {
         if (operation === 'delete') {
