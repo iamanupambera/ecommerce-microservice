@@ -1,44 +1,57 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
-export function softDeleteMiddleware(prisma: PrismaClient) {
-  prisma.$extends({
-    query: {
-      // $allModels: { // use for all model access
-      auth: {
-        async $allOperations({ operation, args, query }) {
-          if (operation === 'delete') {
-            // Change action to update and set deleted to true
-            args['data'] = { deleted: true };
-            operation = 'update';
-          }
+export const softDeleteMiddleware = Prisma.defineExtension({
+  query: {
+    $allModels: {
+      // Apply to all models
+      async $allOperations({ operation, args, query }) {
+        if (operation === 'delete') {
+          // Convert delete to update and set deletedAt to the current timestamp
+          operation = 'update';
+          args = {
+            ...args,
+            data: { deletedAt: new Date() },
+          };
+        }
 
-          if (operation === 'deleteMany') {
-            // Change action to updateMany and set deleted to true
-            operation = 'updateMany';
-            if (args['data'] !== undefined) {
-              args['data']['deleted'] = true;
-            } else {
-              args['data'] = { deleted: true };
-            }
-          }
+        if (operation === 'deleteMany') {
+          // Convert deleteMany to updateMany and set deletedAt to the current timestamp
+          operation = 'updateMany';
+          args = {
+            ...args,
+            data: {
+              ...(args['data'] || {}),
+              deletedAt: new Date(),
+            },
+          };
+        }
 
-          if (operation === 'findUnique') {
-            // Convert findUnique to findFirst and filter out deleted records
-            operation = 'findFirst';
-            args['where'] = { ...args['where'], deleted: null };
-          }
+        if (operation === 'findUnique') {
+          // Convert findUnique to findFirst and filter out soft-deleted records
+          operation = 'findFirst';
+          args = {
+            ...args,
+            where: {
+              ...args['where'],
+              deletedAt: null,
+            },
+          };
+        }
 
-          if (operation === 'findMany' || operation === 'findFirst') {
-            // Exclude deleted records unless explicitly requested
-            args['where'] = args['where']
-              ? { ...args['where'], deleted: args['where'].deleted ?? null }
-              : { deleted: null };
-          }
+        if (operation === 'findMany' || operation === 'findFirst') {
+          // Add filter to exclude soft-deleted records unless explicitly overridden
+          args = {
+            ...args,
+            where: {
+              ...args['where'],
+              deletedAt: args['where']?.deletedAt ?? null,
+            },
+          };
+        }
 
-          // Execute the query
-          return query(args);
-        },
+        // Execute the modified query
+        return query(args);
       },
     },
-  });
-}
+  },
+});

@@ -80,4 +80,18 @@ export class AuthRepository {
       where: { id: userId },
     });
   }
+
+  async getAllUser() {
+    return this.dbRead.prisma.auth.findMany({});
+  }
+
+  async deleteUser() {
+    return this.dbRead.prisma.auth.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
+  }
 }
