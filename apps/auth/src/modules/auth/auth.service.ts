@@ -44,7 +44,7 @@ export class AuthService {
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
-    const result = await this.authRepository.create({
+    const user = await this.authRepository.create({
       username,
       email,
       profilePublicId: '13vuhbk',
@@ -74,7 +74,7 @@ export class AuthService {
             await this.gatewayJwtService.generateToken('NOTIFICATION'),
           payload: {
             receiverEmail: email,
-            verifyLink: `${this.configService.getOrThrow('CLIENT_URL')}/confirm_email?v_token=${randomCharacters}`,
+            verifyLink: `${this.configService.getOrThrow('CLIENT_URL')}/confirm_email?v_token=${randomCharacters}&email=${user.email}`,
           },
           user: null,
         },
@@ -83,9 +83,26 @@ export class AuthService {
         error: (err) => console.error('Error sending email:', err),
       });
 
+    const accessToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '15m' },
+    );
+    const refreshToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '183d' },
+    );
+
     return {
       statusCode: 201,
-      response: result,
+      response: { user, token: { accessToken, refreshToken } },
       message: 'User created successfully',
     };
   }
@@ -394,7 +411,7 @@ export class AuthService {
     };
   }
 
-  async handleRefreshToken({ token }: { token: string }) {
+  async getRefreshToken({ token }: { token: string }) {
     let data = null;
     try {
       data = await this.jwtService.verify(token);
@@ -424,6 +441,73 @@ export class AuthService {
       statusCode: 200,
       response: { user, token: { accessToken, refreshToken } },
       message: 'Refresh token',
+    };
+  }
+
+  async getLoginUser({ token }: { token: string }) {
+    let user = null;
+    try {
+      user = await this.jwtService.verify(token);
+    } catch (error) {
+      console.log(error);
+    }
+
+    user = await this.authRepository.findById(user.id);
+
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    return { statusCode: 200, message: 'Authenticated user', response: user };
+  }
+
+  async resendVerifyEmail({ email }: { email: string }) {
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException(
+        'Email is invalid',
+        'CurrentUser resentEmail() method error',
+      );
+    }
+
+    const randomCharacters = crypto.randomBytes(20).toString('hex');
+    await this.authRepository.updateVerifyEmailField(user.id, {
+      emailVerified: 0,
+      emailVerificationToken: randomCharacters,
+    });
+
+    // send mail to user to verify email
+    this.notificationService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'auth_email_controller', cmd: 'verifyEmail' },
+        {
+          userToken: null,
+          serviceToken:
+            await this.gatewayJwtService.generateToken('NOTIFICATION'),
+          payload: {
+            receiverEmail: email,
+            verifyLink: `${this.configService.getOrThrow('CLIENT_URL')}/confirm_email?v_token=${randomCharacters}&email=${user.email}`,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (err) => console.error('Error sending email:', err),
+      });
+
+    return {
+      statusCode: 200,
+      message: 'Email verification sent',
+      response: user,
     };
   }
 }

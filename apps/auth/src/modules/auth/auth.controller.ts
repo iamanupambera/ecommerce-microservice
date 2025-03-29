@@ -51,8 +51,18 @@ export class AuthController {
     return this.authService.verifyEmail(createAuthDto);
   }
 
-  @MessagePattern({ controller, cmd: 'handleRefreshToken' })
-  handleRefreshToken(@Payload('payload') payload: any) {
-    return this.authService.handleRefreshToken(payload);
+  @MessagePattern({ controller, cmd: 'getRefreshToken' })
+  getRefreshToken(@Payload('payload') payload: any) {
+    return this.authService.getRefreshToken(payload);
+  }
+
+  @MessagePattern({ controller, cmd: 'getLoginUser' })
+  getLoginUser(@Payload('payload') payload: any) {
+    return this.authService.getLoginUser(payload);
+  }
+
+  @MessagePattern({ controller, cmd: 'resendVerifyEmail' })
+  resendVerifyEmail(@Payload('payload') payload: AuthForgotPasswordDto) {
+    return this.authService.resendVerifyEmail(payload);
   }
 }
