@@ -48,10 +48,14 @@ export class AuthRepository {
     });
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string, token = false, otp = false) {
     return this.dbRead.prisma.auth.findUnique({
       where: {
         email,
+      },
+      include: {
+        resetPasswordRequest: token,
+        otp,
       },
     });
   }
@@ -89,20 +93,6 @@ export class AuthRepository {
     });
   }
 
-  async updateById(userId: number, updateData: Prisma.AuthUpdateInput) {
-    return this.dbWrite.prisma.auth.update({
-      where: { id: userId },
-      data: updateData,
-    });
-  }
-
-  async updateByEmail(email: string, updateData: Prisma.AuthUpdateInput) {
-    return this.dbWrite.prisma.auth.update({
-      where: { email },
-      data: updateData,
-    });
-  }
-
   async delete(userId: number): Promise<Auth> {
     return this.dbWrite.prisma.auth.delete({
       where: { id: userId },
@@ -110,13 +100,13 @@ export class AuthRepository {
   }
 
   async getAllUser() {
-    return this.dbRead.prisma.auth.findMany({});
+    return this.dbRead.prisma.auth.findMany();
   }
 
   /**
    * @returns get all soft deleted user
    */
-  async deleteUser() {
+  async getDeleteUser() {
     return this.dbRead.prisma.auth.findMany({
       where: {
         deletedAt: {
@@ -140,6 +130,54 @@ export class AuthRepository {
         ...(deviceType && { deviceType }),
       },
       where: { id: authId },
+    });
+  }
+
+  async updateVerifyEmailField(
+    authId: number,
+    data: { emailVerified: number; emailVerificationToken?: string },
+  ) {
+    return this.dbRead.prisma.auth.update({
+      where: { id: authId },
+      data: {
+        verifiedEmail: {
+          update: data,
+        },
+      },
+    });
+  }
+
+  async updatePasswordToken(
+    authId: number,
+    token: string,
+    tokenExpiration: Date,
+  ) {
+    return this.dbRead.prisma.auth.update({
+      where: { id: authId },
+      data: {
+        resetPasswordRequest: {
+          update: {
+            token,
+            expires: tokenExpiration,
+          },
+        },
+      },
+    });
+  }
+
+  async updatePassword(authId: number, password: string) {
+    const hash = await bcrypt.hash(password, saltRounds);
+    return this.dbRead.prisma.auth.update({
+      where: { id: authId },
+      data: {
+        password: { update: { hash } },
+        resetPasswordRequest: {
+          update: {
+            token: '',
+            expires: new Date(),
+          },
+        },
+      },
     });
   }
 }

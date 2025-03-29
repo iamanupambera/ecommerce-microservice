@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { LoggerModule } from '@repo/modules/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
-import { GatewayJwtModule } from './modules/serviceAccessToken/gatewayJwt.module';
+import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
 
 @Module({
   imports: [

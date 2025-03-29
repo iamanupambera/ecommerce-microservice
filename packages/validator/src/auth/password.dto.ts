@@ -1,13 +1,20 @@
-import { IsNotEmpty, Length, ValidateIf } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class PasswordDTO {
   @IsNotEmpty()
+  @IsString()
   @Length(4, 12)
   password: string;
 
   @IsNotEmpty()
-  @ValidateIf((object, value) => object.password !== value, {
-    message: 'Passwords and confirmPassword should match',
-  })
+  @IsString()
   confirmPassword: string;
+
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

@@ -47,9 +47,15 @@ export const CommonErrors = {
     message: 'Invalid device type',
   },
 
-  UserAleradyExists: {
-    statusCode: 404,
+  UserAlreadyExists: {
+    statusCode: 409,
     error: 'Conflicted Error',
-    message: 'User Alerady Exists',
+    message: 'User Already Exists',
+  },
+
+  InvalidCredential: {
+    statusCode: 401,
+    error: 'Unauthorized Error',
+    message: 'username email and password is wrong',
   },
 };

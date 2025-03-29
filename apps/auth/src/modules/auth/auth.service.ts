@@ -1,6 +1,12 @@
-import { GatewayJwtService } from '../serviceAccessToken/gatewayJwt.service';
+import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { LoginDto, RegisterDto } from '@repo/validator/index';
+import {
+  ChangePasswordDTO,
+  EmailDTO,
+  LoginDto,
+  PasswordDTO,
+  RegisterDto,
+} from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
 import { CommonErrors } from '@repo/modules/index';
 import { AuthRepository } from './auth.repository';
@@ -32,7 +38,7 @@ export class AuthService {
       (await this.authRepository.findByUsername(username)) ||
       (await this.authRepository.findByEmail(email))
     ) {
-      throw new BadRequestException(CommonErrors.UserAleradyExists);
+      throw new BadRequestException(CommonErrors.UserAlreadyExists);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
@@ -86,7 +92,7 @@ export class AuthService {
     const user = await this.authRepository.getUserWithPassword(identifier);
 
     if (!user) {
-      throw new BadRequestException('user not found');
+      throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
     const validPassword = await this.authRepository.isValidatePassword(
@@ -95,7 +101,7 @@ export class AuthService {
     );
 
     if (!validPassword) {
-      throw new BadRequestException('Invalid credentials');
+      throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
     delete user.password;
@@ -138,15 +144,17 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(
       {
+        id: user.id,
         email: user.email,
-        userId: user.id,
+        username: user.username,
       },
       { expiresIn: '15m' },
     );
     const refreshToken = this.jwtService.sign(
       {
+        id: user.id,
         email: user.email,
-        userId: user.id,
+        username: user.username,
       },
       { expiresIn: '183d' },
     );
@@ -155,6 +163,201 @@ export class AuthService {
       statusCode: 200,
       response: { user, token: { accessToken, refreshToken } },
       message: 'User login successfully',
+    };
+  }
+
+  async forgotPassword({ email }: EmailDTO) {
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    const randomCharacters = crypto.randomBytes(20).toString('hex');
+    const date = new Date();
+    date.setHours(date.getHours() + 1);
+    await this.authRepository.updatePasswordToken(
+      user.id,
+      randomCharacters,
+      date,
+    );
+
+    // const resetLink = `${this.configService.getOrThrow('CLIENT_URL')}/reset_password?token=${randomCharacters}&email=${user.email}`;
+
+    // const messageDetails = {
+    //   receiverEmail: user.email,
+    //   resetLink,
+    //   username: user.username,
+    //   template: 'forgotPassword',
+    // };
+
+    return {
+      statusCode: 200,
+      response: user,
+      message: 'Password reset email sent.',
+    };
+  }
+
+  async resetPassword({
+    password,
+    confirmPassword,
+    token,
+    email,
+  }: PasswordDTO) {
+    if (password !== confirmPassword) {
+      throw new BadRequestException(CommonErrors.InvalidCredential);
+    }
+
+    const user = await this.authRepository.findByEmail(email, true);
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    if (user.resetPasswordRequest.token !== token) {
+      throw new BadRequestException(CommonErrors.InvalidCredential);
+    }
+
+    await this.authRepository.updatePassword(user.id, password);
+    // const messageDetails = {
+    //   username: user.username,
+    //   template: 'resetPasswordSuccess',
+    // };
+
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'Password successfully updated.',
+    };
+  }
+
+  async changePassword({
+    newPassword,
+    username,
+    currentPassword,
+  }: ChangePasswordDTO) {
+    const user = await this.authRepository.getUserWithPassword(username);
+
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    if (await this.authRepository.isValidatePassword(user, currentPassword)) {
+      throw new BadRequestException(CommonErrors.InvalidCredential);
+    }
+
+    await this.authRepository.updatePassword(user.id!, newPassword);
+
+    // const messageDetails = {
+    //   username: user.username,
+    //   template: 'resetPasswordSuccess',
+    // };
+
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'Password successfully updated.',
+    };
+  }
+
+  async updateOTP({
+    browserName,
+    deviceType,
+    otp,
+    email,
+  }: {
+    browserName: string;
+    deviceType: string;
+    otp: string;
+    email: string;
+  }) {
+    const user = await this.authRepository.findByEmail(email, false, true);
+
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    if (user.otp.otp !== otp) {
+      throw new BadRequestException(CommonErrors.InvalidCredential);
+    }
+
+    await this.authRepository.updateUserOTP(
+      user.id!,
+      '',
+      new Date(),
+      browserName,
+      deviceType,
+    );
+
+    const accessToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '15m' },
+    );
+    const refreshToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '183d' },
+    );
+
+    return {
+      statusCode: 200,
+      response: { user, token: { accessToken, refreshToken } },
+      message: 'OTP verified successfully.',
+    };
+  }
+
+  async update({ token, email }: { token: string; email: string }) {
+    const user = await this.authRepository.findByEmail(email, true);
+
+    if (!user) {
+      throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    if (user.resetPasswordRequest.token !== token) {
+      throw new BadRequestException(CommonErrors.InvalidCredential);
+    }
+
+    await this.authRepository.updateVerifyEmailField(user.id, {
+      emailVerified: 1,
+    });
+    const updatedUser = await this.authRepository.findById(user.id);
+
+    return {
+      statusCode: 200,
+      response: updatedUser,
+      message: 'Email verified successfully.',
+    };
+  }
+
+  async token({ username }: { username: string }) {
+    const user = await this.authRepository.findByUsername(username);
+    const accessToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '15m' },
+    );
+    const refreshToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+      { expiresIn: '183d' },
+    );
+
+    return {
+      statusCode: 200,
+      response: { user, token: { accessToken, refreshToken } },
+      message: 'Refresh token',
     };
   }
 }
