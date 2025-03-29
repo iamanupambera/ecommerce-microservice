@@ -6,4 +6,4 @@ export {
   RegisterDto,
 } from './auth';
 
-export { VerifyEmailDto } from './notification';
+export { VerifyEmailDto, OtpEmailDto } from './notification';

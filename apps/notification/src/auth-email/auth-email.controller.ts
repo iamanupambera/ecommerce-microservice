@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { AuthEmailService } from './auth-email.service';
-import { VerifyEmailDto } from '@repo/validator/index';
+import { OtpEmailDto, VerifyEmailDto } from '@repo/validator/index';
 
 const controller = 'auth_email_controller';
 
@@ -15,7 +15,7 @@ export class AuthEmailController {
   }
 
   @EventPattern({ controller, cmd: 'otpEmail' })
-  otpEmail(@Payload('payload') payload: VerifyEmailDto) {
-    return payload;
+  otpEmail(@Payload('payload') payload: OtpEmailDto) {
+    return this.authEmailService.otpEmail(payload);
   }
 }

@@ -9,4 +9,9 @@ export class AuthController {
   register(@Body() payload: object) {
     return this.authService.register(payload);
   }
+
+  @Post('login')
+  login(@Body() payload: object) {
+    return this.authService.register(payload);
+  }
 }

@@ -11,20 +11,22 @@ withCredentials: true
   "email": "anupam+5@pitangent.com",
   "password": "qwerty",
   "country": "Germany",
-  "browserName": "test",
-  "deviceType": "test",
+  "browserName": "chrome",
+  "deviceType": "pc",
   "profilePicture": "BGAO;IJPAKEE'PAKPD'L,P"
 }
 
 ###
-POST {{baseUrl}}/{{urlPath}}/signin
+POST {{baseUrl}}/{{urlPath}}/login
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 {
-  "username": "danny",
-  "password": "qwerty"
+  "identifier": "danny",
+  "password": "qwerty",
+  "browserName": "chrome",
+  "deviceType": "pc",
 }
 
 ###

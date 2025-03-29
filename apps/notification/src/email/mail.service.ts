@@ -12,18 +12,17 @@ export class MailService {
     private readonly configService: ConfigService,
   ) {}
 
-  async sendVerificationEmail(email: string, verifyLink: string) {
+  async sendVerificationEmail(receiverEmail: string, verifyLink: string) {
     const html = await renderEmail('VerifyEmail', {
       appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
       appIcon,
       verifyLink,
     });
-    console.log({ html });
 
     try {
       await this.mailerService.sendMail({
-        to: email,
-        subject: "Here's your 6-digit verification code",
+        to: receiverEmail,
+        subject: 'Verify Your Email',
         html,
       });
     } catch (error) {
@@ -35,5 +34,22 @@ export class MailService {
 
   async notifyChangeEmail() {}
 
-  async sendOtp() {}
+  async sendOtpEmail(receiverEmail: string, otp: string, username: string) {
+    const html = await renderEmail('OtpEmail', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      otp,
+      username,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: receiverEmail,
+        subject: `Here's your 6-digit verification code`,
+        html,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
