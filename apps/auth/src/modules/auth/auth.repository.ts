@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import type { Auth, Prisma } from '@prisma/client';
+import type { Auth, Password, Prisma } from '@prisma/client';
 import { PrismaReadService } from '../prisma/prisma-read.service';
 import { PrismaWriteService } from '../prisma/prisma-write.service';
-import { RegisterDto } from '@repo/validator/index';
+import bcrypt from 'bcrypt';
+const saltRounds = 8;
 
 @Injectable()
 export class AuthRepository {
@@ -11,10 +12,20 @@ export class AuthRepository {
     private readonly dbWrite: PrismaWriteService,
   ) {}
 
-  create(user: Prisma.AuthCreateInput) {
+  async create({
+    password,
+    emailVerificationToken,
+    ...user
+  }: Prisma.AuthCreateInput &
+    Omit<Prisma.VerifiedEmailCreateInput, 'auth'> & { password: string }) {
+    const hash = await bcrypt.hash(password, saltRounds);
     return this.dbWrite.prisma.auth.create({
       data: {
         ...user,
+        password: {
+          create: { hash },
+        },
+        verifiedEmail: { create: { emailVerificationToken } },
       },
     });
   }
@@ -45,6 +56,13 @@ export class AuthRepository {
     });
   }
 
+  async isValidatePassword(
+    user: Auth & { password: Password },
+    password: string,
+  ) {
+    return bcrypt.compare(password, user.password.hash);
+  }
+
   async findByUsername(username: string) {
     return this.dbRead.prisma.auth.findUnique({
       where: {
@@ -53,15 +71,25 @@ export class AuthRepository {
     });
   }
 
-  async findByUsernameOrEmail(identifier: string) {
+  /**
+   * WARNING: This function retrieves user information, including the password.
+   * Use with extreme caution to avoid exposing sensitive information.
+   *
+   * @param where - Criteria to find the user (email, id, or username).
+   * @returns The user object including the password field.
+   */
+  async getUserWithPassword(identifier: string) {
     return this.dbRead.prisma.auth.findFirst({
       where: {
         OR: [{ email: identifier }, { username: identifier }],
       },
+      include: {
+        password: true,
+      },
     });
   }
 
-  async updateById(userId: number, updateData: Partial<RegisterDto>) {
+  async updateById(userId: number, updateData: Prisma.AuthUpdateInput) {
     return this.dbWrite.prisma.auth.update({
       where: { id: userId },
       data: updateData,
@@ -85,6 +113,9 @@ export class AuthRepository {
     return this.dbRead.prisma.auth.findMany({});
   }
 
+  /**
+   * @returns get all soft deleted user
+   */
   async deleteUser() {
     return this.dbRead.prisma.auth.findMany({
       where: {
@@ -92,6 +123,23 @@ export class AuthRepository {
           not: null,
         },
       },
+    });
+  }
+
+  async updateUserOTP(
+    authId: number,
+    otp: string,
+    otpExpiration: Date,
+    browserName: string,
+    deviceType: string,
+  ): Promise<void> {
+    await this.dbWrite.prisma.auth.update({
+      data: {
+        otp: { update: { otp, expires: otpExpiration } },
+        ...(browserName && { browserName }),
+        ...(deviceType && { deviceType }),
+      },
+      where: { id: authId },
     });
   }
 }

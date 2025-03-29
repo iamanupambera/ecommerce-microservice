@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AuthRepository } from './auth.repository';
@@ -8,7 +9,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    PrismaModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow('USER_JWT_SECRET'),
+      }),
+    }),
     ClientsModule.registerAsync([
       {
         name: 'NOTIFICATION_SERVICE',
@@ -28,6 +35,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         }),
       },
     ]),
+    PrismaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository],

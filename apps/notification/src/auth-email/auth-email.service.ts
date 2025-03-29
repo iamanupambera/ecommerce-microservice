@@ -6,7 +6,7 @@ import { VerifyEmailDto } from '@repo/validator/index';
 export class AuthEmailService {
   constructor(private mailService: MailService) {}
   async verifyEmail(payload: VerifyEmailDto) {
-    await this.mailService.sendVerifiactionEmail(
+    await this.mailService.sendVerificationEmail(
       payload.receiverEmail,
       payload.verifyLink,
     );

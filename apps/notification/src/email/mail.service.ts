@@ -12,7 +12,7 @@ export class MailService {
     private readonly configService: ConfigService,
   ) {}
 
-  async sendVerifiactionEmail(email: string, verifyLink: string) {
+  async sendVerificationEmail(email: string, verifyLink: string) {
     const html = await renderEmail('VerifyEmail', {
       appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
       appIcon,

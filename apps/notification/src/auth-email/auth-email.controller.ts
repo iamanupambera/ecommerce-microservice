@@ -9,8 +9,13 @@ const controller = 'auth_email_controller';
 export class AuthEmailController {
   constructor(private readonly authEmailService: AuthEmailService) {}
 
-  @EventPattern({ controller, cmd: 'otpEmail' })
+  @EventPattern({ controller, cmd: 'verifyEmail' })
   verifyEmail(@Payload('payload') payload: VerifyEmailDto) {
     return this.authEmailService.verifyEmail(payload);
+  }
+
+  @EventPattern({ controller, cmd: 'otpEmail' })
+  otpEmail(@Payload('payload') payload: VerifyEmailDto) {
+    return payload;
   }
 }

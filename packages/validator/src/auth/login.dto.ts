@@ -1,36 +1,20 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-  ValidateIf,
-} from 'class-validator';
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class LoginDto {
-  @ValidateIf((object) => object.email === undefined, {
-    message: 'Please enter username or email',
-  })
+  @IsNotEmpty()
   @IsString()
-  @Length(4, 12)
-  username?: string;
-
-  @ValidateIf((object) => object.username === undefined, {
-    message: 'Please enter username or email',
-  })
-  @IsEmail()
-  email?: string;
+  identifier: string;
 
   @IsNotEmpty()
   @IsString()
   @Length(4, 12)
   password: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  browserName?: string;
+  browserName: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  deviceType?: string;
+  deviceType: string;
 }

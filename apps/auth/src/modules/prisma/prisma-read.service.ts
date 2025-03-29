@@ -11,7 +11,7 @@ export class PrismaReadService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     readonly configService: ConfigService,
-    private logger: LoggerService,
+    private readonly logger: LoggerService,
   ) {
     const dbUrl = configService.getOrThrow<string>('MYSQL_URL');
 
