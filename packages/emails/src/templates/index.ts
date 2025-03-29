@@ -6,5 +6,5 @@ export { default as OrderExtensionApproval } from './OrderExtensionApproval';
 export { default as OrderPlaced } from './OrderPlaced';
 export { default as OrderReceipt } from './OrderReceipt';
 export { default as OtpEmail } from './OtpEmail';
-export { default as ResetPasswordSuccess } from './ResetPasswordSuccess';
+export { default as PasswordChange } from './PasswordChange';
 export { default as VerifyEmail } from './VerifyEmail';

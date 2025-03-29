@@ -1,11 +1,13 @@
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
+  AuthVerifyEmailDto,
   ChangePasswordDTO,
-  EmailDTO,
+  AuthForgotPasswordDto,
   LoginDto,
   PasswordDTO,
   RegisterDto,
+  VerifyOtpDto,
 } from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
 import { CommonErrors } from '@repo/modules/index';
@@ -109,6 +111,7 @@ export class AuthService {
     if (browserName !== user.browserName || deviceType !== user.deviceType) {
       const otp = randomInt(10 ** 5, 10 ** 6 - 1);
 
+      // user login from different device send verify email
       this.notificationService
         .send(
           { controller: 'auth_email_controller', cmd: 'otpEmail' },
@@ -166,7 +169,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword({ email }: EmailDTO) {
+  async forgotPassword({ email }: AuthForgotPasswordDto) {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
@@ -182,14 +185,35 @@ export class AuthService {
       date,
     );
 
-    // const resetLink = `${this.configService.getOrThrow('CLIENT_URL')}/reset_password?token=${randomCharacters}&email=${user.email}`;
+    const resetLink = `${this.configService.getOrThrow('CLIENT_URL')}/reset_password?token=${randomCharacters}&email=${user.email}`;
 
-    // const messageDetails = {
-    //   receiverEmail: user.email,
-    //   resetLink,
-    //   username: user.username,
-    //   template: 'forgotPassword',
-    // };
+    // send forgotPassword mail to user
+    this.notificationService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'auth_email_controller', cmd: 'forgotPassword' },
+        {
+          userToken: null,
+          serviceToken:
+            await this.gatewayJwtService.generateToken('NOTIFICATION'),
+          payload: {
+            receiverEmail: user.email,
+            resetLink,
+            username: user.username,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (err) => console.error('Error sending email:', err),
+      });
 
     return {
       statusCode: 200,
@@ -218,10 +242,33 @@ export class AuthService {
     }
 
     await this.authRepository.updatePassword(user.id, password);
-    // const messageDetails = {
-    //   username: user.username,
-    //   template: 'resetPasswordSuccess',
-    // };
+
+    // send mail to user to notify
+    this.notificationService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'auth_email_controller', cmd: 'passwordChange' },
+        {
+          userToken: null,
+          serviceToken:
+            await this.gatewayJwtService.generateToken('NOTIFICATION'),
+          payload: {
+            receiverEmail: email,
+            username: user.username,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (err) => console.error('Error sending email:', err),
+      });
 
     return {
       statusCode: 200,
@@ -247,10 +294,32 @@ export class AuthService {
 
     await this.authRepository.updatePassword(user.id!, newPassword);
 
-    // const messageDetails = {
-    //   username: user.username,
-    //   template: 'resetPasswordSuccess',
-    // };
+    // send mail to user to notify
+    this.notificationService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'auth_email_controller', cmd: 'passwordChange' },
+        {
+          userToken: null,
+          serviceToken:
+            await this.gatewayJwtService.generateToken('NOTIFICATION'),
+          payload: {
+            receiverEmail: user.email,
+            username: user.username,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (err) => console.error('Error sending email:', err),
+      });
 
     return {
       statusCode: 200,
@@ -259,17 +328,7 @@ export class AuthService {
     };
   }
 
-  async updateOTP({
-    browserName,
-    deviceType,
-    otp,
-    email,
-  }: {
-    browserName: string;
-    deviceType: string;
-    otp: string;
-    email: string;
-  }) {
+  async verifyOtp({ browserName, deviceType, otp, email }: VerifyOtpDto) {
     const user = await this.authRepository.findByEmail(email, false, true);
 
     if (!user) {
@@ -312,7 +371,7 @@ export class AuthService {
     };
   }
 
-  async update({ token, email }: { token: string; email: string }) {
+  async verifyEmail({ token, email }: AuthVerifyEmailDto) {
     const user = await this.authRepository.findByEmail(email, true);
 
     if (!user) {
@@ -335,8 +394,15 @@ export class AuthService {
     };
   }
 
-  async token({ username }: { username: string }) {
-    const user = await this.authRepository.findByUsername(username);
+  async handleRefreshToken({ token }: { token: string }) {
+    let data = null;
+    try {
+      data = await this.jwtService.verify(token);
+    } catch (error) {
+      console.log(error);
+    }
+
+    const user = await this.authRepository.findByUsername(data.username);
     const accessToken = this.jwtService.sign(
       {
         id: user.id,

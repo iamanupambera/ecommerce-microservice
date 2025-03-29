@@ -30,9 +30,46 @@ export class MailService {
     }
   }
 
-  async notifyChangePassword() {}
+  async sendForgotPasswordEmail(
+    receiverEmail: string,
+    username: string,
+    resetLink: string,
+  ) {
+    const html = await renderEmail('ForgotPassword', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      username,
+      resetLink,
+    });
 
-  async notifyChangeEmail() {}
+    try {
+      await this.mailerService.sendMail({
+        to: receiverEmail,
+        subject: 'Reset your Password',
+        html,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async notifyChangePassword(receiverEmail: string, username: string) {
+    const html = await renderEmail('PasswordChange', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      username,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: receiverEmail,
+        subject: 'Password change Successfully!',
+        html,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async sendOtpEmail(receiverEmail: string, otp: string, username: string) {
     const html = await renderEmail('OtpEmail', {

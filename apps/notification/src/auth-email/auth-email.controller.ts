@@ -1,7 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { AuthEmailService } from './auth-email.service';
-import { OtpEmailDto, VerifyEmailDto } from '@repo/validator/index';
+import {
+  OtpEmailDto,
+  VerifyEmailDto,
+  ForgotPasswordDto,
+  PasswordChangeDto,
+} from '@repo/validator/index';
 
 const controller = 'auth_email_controller';
 
@@ -17,5 +22,15 @@ export class AuthEmailController {
   @EventPattern({ controller, cmd: 'otpEmail' })
   otpEmail(@Payload('payload') payload: OtpEmailDto) {
     return this.authEmailService.otpEmail(payload);
+  }
+
+  @EventPattern({ controller, cmd: 'forgotPassword' })
+  forgotPasswordEmail(@Payload('payload') payload: ForgotPasswordDto) {
+    return this.authEmailService.forgotPasswordEmail(payload);
+  }
+
+  @EventPattern({ controller, cmd: 'passwordChange' })
+  passwordChange(@Payload('payload') payload: PasswordChangeDto) {
+    return this.authEmailService.passwordChange(payload);
   }
 }

@@ -1,6 +1,6 @@
 export const subject = 'Password Reset Successful';
 
-export default function ResetPasswordSuccess({
+export default function PasswordChange({
   appLink,
   appIcon,
   username,

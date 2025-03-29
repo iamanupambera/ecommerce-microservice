@@ -1,9 +1,16 @@
 export {
+  AuthForgotPasswordDto,
+  AuthVerifyEmailDto,
   ChangePasswordDTO,
-  EmailDTO,
   LoginDto,
   PasswordDTO,
   RegisterDto,
+  VerifyOtpDto,
 } from './auth';
 
-export { VerifyEmailDto, OtpEmailDto } from './notification';
+export {
+  VerifyEmailDto,
+  OtpEmailDto,
+  ForgotPasswordDto,
+  PasswordChangeDto,
+} from './notification';
