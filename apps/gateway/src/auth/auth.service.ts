@@ -1,5 +1,6 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { Response } from 'express';
 import { catchError, map } from 'rxjs';
 import { GatewayJwtService } from 'src/gatewayJwt/gatewayJwt.service';
 const controller = 'auth_controller';
@@ -11,7 +12,7 @@ export class AuthService {
     private readonly gatewayJwtService: GatewayJwtService,
   ) {}
 
-  async register(payload: object) {
+  async register(payload: object, res: Response) {
     return this.authService
       .send<
         object,
@@ -31,7 +32,19 @@ export class AuthService {
         },
       )
       .pipe(
-        map((response) => {
+        map((response: any) => {
+          const {
+            response: { token },
+          } = response;
+          if (token.refreshToken) {
+            res.cookie('refreshToken', token.refreshToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'lax',
+            });
+          }
+
+          response.response.token.refreshToken = undefined;
           return response;
         }),
         catchError((err) => {
@@ -40,7 +53,7 @@ export class AuthService {
       );
   }
 
-  async login(payload: object) {
+  async login(payload: object, res: Response) {
     return this.authService
       .send<
         object,
@@ -60,7 +73,19 @@ export class AuthService {
         },
       )
       .pipe(
-        map((response) => {
+        map((response: any) => {
+          const {
+            response: { token },
+          } = response;
+          if (token.refreshToken) {
+            res.cookie('refreshToken', token.refreshToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'lax',
+            });
+          }
+
+          response.response.token.refreshToken = undefined;
           return response;
         }),
         catchError((err) => {
@@ -98,7 +123,7 @@ export class AuthService {
       );
   }
 
-  async getRefreshToken(payload: object) {
+  async getRefreshToken(payload: object, res: Response) {
     return this.authService
       .send<
         object,
@@ -118,7 +143,19 @@ export class AuthService {
         },
       )
       .pipe(
-        map((response) => {
+        map((response: any) => {
+          const {
+            response: { token },
+          } = response;
+          if (token.refreshToken) {
+            res.cookie('refreshToken', token.refreshToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'lax',
+            });
+          }
+
+          response.response.token.refreshToken = undefined;
           return response;
         }),
         catchError((err) => {
@@ -185,7 +222,7 @@ export class AuthService {
       );
   }
 
-  async verifyOTP(payload: object) {
+  async verifyOTP(payload: object, res: Response) {
     return this.authService
       .send<
         object,
@@ -205,7 +242,19 @@ export class AuthService {
         },
       )
       .pipe(
-        map((response) => {
+        map((response: any) => {
+          const {
+            response: { token },
+          } = response;
+          if (token.refreshToken) {
+            res.cookie('refreshToken', token.refreshToken, {
+              httpOnly: true,
+              secure: true,
+              sameSite: 'lax',
+            });
+          }
+
+          response.response.token.refreshToken = undefined;
           return response;
         }),
         catchError((err) => {

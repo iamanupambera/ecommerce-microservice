@@ -1,18 +1,19 @@
-import { Controller, Post, Body, Put, Get } from '@nestjs/common';
+import { Controller, Post, Body, Put, Get, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() payload: object) {
-    return this.authService.register(payload);
+  register(@Body() payload: object, @Res() res: Response) {
+    return this.authService.register(payload, res);
   }
 
   @Post('login')
-  login(@Body() payload: object) {
-    return this.authService.login(payload);
+  login(@Body() payload: object, @Res() res: Response) {
+    return this.authService.login(payload, res);
   }
 
   @Get('current-user')
@@ -21,8 +22,8 @@ export class AuthController {
   }
 
   @Get('refresh-token')
-  getRefreshToken(@Body() payload: object) {
-    this.authService.getRefreshToken(payload);
+  getRefreshToken(@Body() payload: object, @Res() res: Response) {
+    this.authService.getRefreshToken(payload, res);
   }
 
   @Put('change-password')
@@ -36,8 +37,8 @@ export class AuthController {
   }
 
   @Put('verify-otp/:otp')
-  verifyOtp(@Body() payload: object) {
-    this.authService.verifyOTP(payload);
+  verifyOtp(@Body() payload: object, @Res() res: Response) {
+    this.authService.verifyOTP(payload, res);
   }
 
   @Get('resend-email')
@@ -56,9 +57,13 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout() {
+  logout(@Res() res: Response) {
+    res.clearCookie('refreshToken');
+
     return {
-      message: 'success',
+      statusCode: 200,
+      response: {},
+      message: 'logout successfully',
     };
   }
 }
