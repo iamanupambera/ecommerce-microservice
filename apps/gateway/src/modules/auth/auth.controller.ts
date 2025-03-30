@@ -7,12 +7,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() payload: object, @Res() res: Response) {
+  register(@Body() payload: object, @Res({ passthrough: true }) res: Response) {
     return this.authService.register(payload, res);
   }
 
   @Post('login')
-  login(@Body() payload: object, @Res() res: Response) {
+  login(@Body() payload: object, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(payload, res);
   }
 
@@ -22,7 +22,10 @@ export class AuthController {
   }
 
   @Get('refresh-token')
-  getRefreshToken(@Body() payload: object, @Res() res: Response) {
+  getRefreshToken(
+    @Body() payload: object,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     this.authService.getRefreshToken(payload, res);
   }
 
@@ -37,7 +40,10 @@ export class AuthController {
   }
 
   @Put('verify-otp/:otp')
-  verifyOtp(@Body() payload: object, @Res() res: Response) {
+  verifyOtp(
+    @Body() payload: object,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     this.authService.verifyOTP(payload, res);
   }
 
@@ -57,7 +63,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  logout(@Res() res: Response) {
+  logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('refreshToken');
 
     return {

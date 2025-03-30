@@ -1,14 +1,15 @@
 @baseUrl = http://localhost:3000
 @urlPath=api/gateway/v1/auth
 
+###
 POST {{baseUrl}}/{{urlPath}}/register
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
 
 {
-  "username": "anupam5",
-  "email": "anupam+5@pitangent.com",
+  "username": "anupam12",
+  "email": "anupam+12@pitangent.com",
   "password": "qwerty",
   "country": "Germany",
   "browserName": "chrome",
