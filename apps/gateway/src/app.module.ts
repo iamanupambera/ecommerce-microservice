@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { GatewayJwtModule } from './gatewayJwt/gatewayJwt.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
 
 @Module({
   imports: [
