@@ -123,7 +123,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    delete user.password;
+    delete user.authPassword;
 
     if (browserName !== user.browserName || deviceType !== user.deviceType) {
       const otp = randomInt(10 ** 5, 10 ** 6 - 1);
@@ -352,7 +352,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
-    if (user.otp.otp !== otp) {
+    if (user.authOtp.otp !== otp) {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 

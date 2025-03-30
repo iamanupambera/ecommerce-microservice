@@ -30,6 +30,60 @@ withCredentials: true
 }
 
 ###
+GET {{baseUrl}}/{{urlPath}}/current-user
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/refresh-token      
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/change-password      
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/verify-email
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/verify-otp/:otp      
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+GET {{baseUrl}}/{{urlPath}}/resend-email
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/forgot-password
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+PUT {{baseUrl}}/{{urlPath}}/reset-password/:token
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
+POST {{baseUrl}}/{{urlPath}}/logout
+Content-Type: application/json
+Accept: application/json
+withCredentials: true
+
+###
 GET {{baseUrl}}/{{urlPath}}/search/gig/0/5/forward?query=beauty&delivery_time=delivery 3 days&minPrice=5&maxPrice=20
 Content-Type: application/json
 Accept: application/json

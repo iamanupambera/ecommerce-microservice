@@ -9,27 +9,27 @@ datasource db {
 }
 
 model Auth {
-  id              Int       @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   username        String
-  password        Password?
+  authPassword    AuthPassword?
   profilePublicId String
   email           String
   country         String
   profilePicture  String
-  emailVerified   Boolean   @default(false)
+  emailVerified   Boolean       @default(false)
   browserName     String
   deviceType      String
   lastActiveAt    DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime? @db.Timestamp
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?     @db.Timestamp
 
   // identityProvider     IdentityProvider      @default(CAL)
   // apiKeys              ApiKey[]
-  sessions             Session[]
+  authSessions         AuthSession[]
   verifiedEmail        VerifiedEmail?
   resetPasswordRequest ResetPasswordRequest?
-  otp                  OTP?
+  authOtp              AuthOTP?
 
   @@unique([email])
   @@unique([username])
@@ -37,7 +37,7 @@ model Auth {
 }
 
 // It holds the password of a User, separate from the Auth model to avoid leaking the password hash
-model Password {
+model AuthPassword {
   id     Int    @id @default(autoincrement())
   hash   String
   authId Int
@@ -86,7 +86,7 @@ model ResetPasswordRequest {
 //   @@index([apiKeyId])
 // }
 
-model Session {
+model AuthSession {
   id           Int      @id @default(autoincrement())
   refreshToken String?  @db.Text
   accessToken  String?  @db.Text
@@ -108,7 +108,7 @@ model VerifiedEmail {
   @@index([authId])
 }
 
-model OTP {
+model AuthOTP {
   id      Int      @id @default(autoincrement())
   otp     String?
   expires DateTime

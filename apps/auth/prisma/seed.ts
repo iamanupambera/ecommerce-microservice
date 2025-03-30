@@ -47,7 +47,7 @@ async function main() {
     const user = await prisma.auth.create({
       data: {
         ...u,
-        password: {
+        authPassword: {
           create: { hash },
         },
       },

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Auth, Password, Prisma } from '@prisma/client';
+import type { Auth, AuthPassword, Prisma } from '@prisma/client';
 import { PrismaReadService } from '../prisma/prisma-read.service';
 import { PrismaWriteService } from '../prisma/prisma-write.service';
 import bcrypt from 'bcrypt';
@@ -22,7 +22,7 @@ export class AuthRepository {
     return this.dbWrite.prisma.auth.create({
       data: {
         ...user,
-        password: {
+        authPassword: {
           create: { hash },
         },
         verifiedEmail: { create: { emailVerificationToken } },
@@ -48,23 +48,23 @@ export class AuthRepository {
     });
   }
 
-  async findByEmail(email: string, token = false, otp = false) {
+  async findByEmail(email: string, token = false, authOtp = false) {
     return this.dbRead.prisma.auth.findUnique({
       where: {
         email,
       },
       include: {
         resetPasswordRequest: token,
-        otp,
+        authOtp,
       },
     });
   }
 
   async isValidatePassword(
-    user: Auth & { password: Password },
+    user: Auth & { authPassword: AuthPassword },
     password: string,
   ) {
-    return bcrypt.compare(password, user.password.hash);
+    return bcrypt.compare(password, user.authPassword.hash);
   }
 
   async findByUsername(username: string) {
@@ -88,7 +88,7 @@ export class AuthRepository {
         OR: [{ email: identifier }, { username: identifier }],
       },
       include: {
-        password: true,
+        authPassword: true,
       },
     });
   }
@@ -125,7 +125,7 @@ export class AuthRepository {
   ): Promise<void> {
     await this.dbWrite.prisma.auth.update({
       data: {
-        otp: { update: { otp, expires: otpExpiration } },
+        authOtp: { update: { otp, expires: otpExpiration } },
         ...(browserName && { browserName }),
         ...(deviceType && { deviceType }),
       },
@@ -170,7 +170,7 @@ export class AuthRepository {
     return this.dbRead.prisma.auth.update({
       where: { id: authId },
       data: {
-        password: { update: { hash } },
+        authPassword: { update: { hash } },
         resetPasswordRequest: {
           update: {
             token: '',
