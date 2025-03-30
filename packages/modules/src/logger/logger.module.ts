@@ -1,4 +1,4 @@
-import { Module, DynamicModule, Provider } from '@nestjs/common';
+import { Module, DynamicModule, Provider, Global } from '@nestjs/common';
 import {
   ElasticsearchTransformer,
   ElasticsearchTransport,
@@ -7,6 +7,7 @@ import { LoggerService } from './logger.service';
 import { LoggerModuleOptions } from './logger.interface';
 import winston from 'winston';
 
+@Global()
 @Module({})
 export class LoggerModule {
   static registerAsync(options: {
