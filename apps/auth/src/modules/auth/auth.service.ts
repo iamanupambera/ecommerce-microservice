@@ -56,6 +56,7 @@ export class AuthService {
       emailVerificationToken: randomCharacters,
       browserName,
       deviceType,
+      lastActiveAt: new Date(),
     });
 
     // send mail to user to verify email
