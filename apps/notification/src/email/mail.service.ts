@@ -2,6 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { renderEmail } from '@repo/emails';
+import { LoggerService } from '@repo/modules/index';
 
 const appIcon = 'https://i.ibb.co/Kyp2m0t/cover.png';
 
@@ -10,6 +11,7 @@ export class MailService {
   constructor(
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
+    private readonly logger: LoggerService,
   ) {}
 
   async sendVerificationEmail(receiverEmail: string, verifyLink: string) {
@@ -26,7 +28,11 @@ export class MailService {
         html,
       });
     } catch (error) {
-      console.log(error);
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendVerificationEmail',
+        error,
+      );
     }
   }
 
@@ -49,7 +55,11 @@ export class MailService {
         html,
       });
     } catch (error) {
-      console.log(error);
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendForgotPasswordEmail',
+        error,
+      );
     }
   }
 
@@ -67,7 +77,11 @@ export class MailService {
         html,
       });
     } catch (error) {
-      console.log(error);
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at notifyChangePassword',
+        error,
+      );
     }
   }
 
@@ -86,7 +100,11 @@ export class MailService {
         html,
       });
     } catch (error) {
-      console.log(error);
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOtpEmail',
+        error,
+      );
     }
   }
 }

@@ -58,4 +58,10 @@ export const CommonErrors = {
     error: 'Unauthorized Error',
     message: 'username email and password is wrong',
   },
+
+  UserSessionExpire: {
+    statusCode: 401,
+    error: 'Unauthorized Error',
+    message: 'login session expire',
+  },
 };

@@ -10,11 +10,12 @@ import {
   VerifyOtpDto,
 } from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
-import { CommonErrors } from '@repo/modules/index';
+import { CommonErrors, LoggerService } from '@repo/modules/index';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
 import crypto, { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { AuthJwtPayload } from 'src/shared/interface';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +26,7 @@ export class AuthService {
     private readonly notificationService: ClientProxy,
     private readonly jwtService: JwtService,
     private readonly gatewayJwtService: GatewayJwtService,
+    private readonly logger: LoggerService,
   ) {}
 
   async register({
@@ -80,25 +82,44 @@ export class AuthService {
         },
       )
       .subscribe({
-        error: (err) => console.error('Error sending email:', err),
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at auth register',
+            error,
+          );
+        },
       });
 
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '15m' },
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '183d' },
-    );
+    const accessTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const refreshTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const session = await this.authRepository.createSession(user.id, {
+      accessToken: accessTokenOtp,
+      refreshToken: refreshTokenOtp,
+    });
+
+    const accessTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.accessToken,
+    };
+
+    const refreshTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.refreshToken,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      expiresIn: '15m',
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      expiresIn: '183d',
+    });
 
     return {
       statusCode: 201,
@@ -145,7 +166,13 @@ export class AuthService {
           },
         )
         .subscribe({
-          error: (err) => console.error('Error sending email:', err),
+          error: (error) => {
+            this.logger.log(
+              'error',
+              AuthService.name + ' service error at auth login',
+              error,
+            );
+          },
         });
 
       const date: Date = new Date();
@@ -162,22 +189,35 @@ export class AuthService {
       };
     }
 
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '15m' },
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '183d' },
-    );
+    const accessTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const refreshTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const session = await this.authRepository.createSession(user.id, {
+      accessToken: accessTokenOtp,
+      refreshToken: refreshTokenOtp,
+    });
+
+    const accessTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.accessToken,
+    };
+
+    const refreshTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.refreshToken,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      expiresIn: '15m',
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      expiresIn: '183d',
+    });
 
     return {
       statusCode: 200,
@@ -229,7 +269,13 @@ export class AuthService {
         },
       )
       .subscribe({
-        error: (err) => console.error('Error sending email:', err),
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at auth forgot password',
+            error,
+          );
+        },
       });
 
     return {
@@ -254,11 +300,11 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
-    if (user.resetPasswordRequest.token !== token) {
+    if (user.resetPasswordRequest?.token !== token) {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    await this.authRepository.updatePassword(user.id, password);
+    await this.authRepository.updatePassword(user.id, password, true);
 
     // send mail to user to notify
     this.notificationService
@@ -284,7 +330,13 @@ export class AuthService {
         },
       )
       .subscribe({
-        error: (err) => console.error('Error sending email:', err),
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at auth reset password',
+            error,
+          );
+        },
       });
 
     return {
@@ -295,8 +347,8 @@ export class AuthService {
   }
 
   async changePassword({
-    newPassword,
     username,
+    newPassword,
     currentPassword,
   }: ChangePasswordDTO) {
     const user = await this.authRepository.getUserWithPassword(username);
@@ -309,7 +361,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    await this.authRepository.updatePassword(user.id!, newPassword);
+    await this.authRepository.updatePassword(user.id, newPassword);
 
     // send mail to user to notify
     this.notificationService
@@ -335,7 +387,13 @@ export class AuthService {
         },
       )
       .subscribe({
-        error: (err) => console.error('Error sending email:', err),
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at auth change password',
+            error,
+          );
+        },
       });
 
     return {
@@ -356,30 +414,41 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    await this.authRepository.updateUserOTP(
-      user.id!,
-      '',
-      new Date(),
+    await this.authRepository.updateUserById(user.id, {
       browserName,
       deviceType,
-    );
+    });
 
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '15m' },
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '183d' },
-    );
+    await this.authRepository.deleteUserOtp(user.authOtp.id);
+    const accessTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const refreshTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const session = await this.authRepository.createSession(user.id, {
+      accessToken: accessTokenOtp,
+      refreshToken: refreshTokenOtp,
+    });
+
+    const accessTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.accessToken,
+    };
+
+    const refreshTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.refreshToken,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      expiresIn: '15m',
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      expiresIn: '183d',
+    });
 
     return {
       statusCode: 200,
@@ -399,8 +468,8 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    await this.authRepository.updateVerifyEmailField(user.id, {
-      emailVerified: 1,
+    await this.authRepository.updateVerifyEmailField(user.id, true, {
+      emailVerificationToken: '',
     });
     const updatedUser = await this.authRepository.findById(user.id);
 
@@ -412,30 +481,44 @@ export class AuthService {
   }
 
   async getRefreshToken({ token }: { token: string }) {
-    let data = null;
+    let data: AuthJwtPayload = null;
     try {
-      data = await this.jwtService.verify(token);
+      data = this.jwtService.verify<AuthJwtPayload>(token);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.log(error);
+      throw new BadRequestException(CommonErrors.UserSessionExpire);
     }
 
     const user = await this.authRepository.findByUsername(data.username);
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '15m' },
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      { expiresIn: '183d' },
-    );
+    const accessTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const refreshTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
+    const session = await this.authRepository.updateSessionById(user.id, {
+      accessToken: accessTokenOtp,
+      refreshToken: refreshTokenOtp,
+    });
+
+    const accessTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.accessToken,
+    };
+
+    const refreshTokenPayload: AuthJwtPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      sessionId: session.id,
+      otp: session.refreshToken,
+    };
+
+    const accessToken = this.jwtService.sign(accessTokenPayload, {
+      expiresIn: '15m',
+    });
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      expiresIn: '183d',
+    });
 
     return {
       statusCode: 200,
@@ -445,14 +528,15 @@ export class AuthService {
   }
 
   async getLoginUser({ token }: { token: string }) {
-    let user = null;
+    let data: AuthJwtPayload = null;
     try {
-      user = await this.jwtService.verify(token);
+      data = this.jwtService.verify<AuthJwtPayload>(token);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.log(error);
+      throw new BadRequestException(CommonErrors.UserSessionExpire);
     }
 
-    user = await this.authRepository.findById(user.id);
+    const user = await this.authRepository.findById(data.id);
 
     if (!user) {
       throw new BadRequestException(CommonErrors.UserNotFound);
@@ -465,15 +549,11 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(
-        'Email is invalid',
-        'CurrentUser resentEmail() method error',
-      );
+      throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
-    await this.authRepository.updateVerifyEmailField(user.id, {
-      emailVerified: 0,
+    await this.authRepository.updateVerifyEmailField(user.id, false, {
       emailVerificationToken: randomCharacters,
     });
 
@@ -501,7 +581,13 @@ export class AuthService {
         },
       )
       .subscribe({
-        error: (err) => console.error('Error sending email:', err),
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at resendVerifyEmail',
+            error,
+          );
+        },
       });
 
     return {

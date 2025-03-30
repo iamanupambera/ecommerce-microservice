@@ -88,8 +88,8 @@ model ResetPasswordRequest {
 
 model AuthSession {
   id           Int      @id @default(autoincrement())
-  refreshToken String?  @db.Text
-  accessToken  String?  @db.Text
+  refreshToken String
+  accessToken  String
   authId       Int
   auth         Auth?    @relation(fields: [authId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())

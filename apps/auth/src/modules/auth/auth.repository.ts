@@ -93,6 +93,10 @@ export class AuthRepository {
     });
   }
 
+  updateUserById(id: number, data: Prisma.AuthUpdateInput) {
+    return this.dbWrite.prisma.auth.update({ data, where: { id } });
+  }
+
   async delete(userId: number): Promise<Auth> {
     return this.dbWrite.prisma.auth.delete({
       where: { id: userId },
@@ -122,10 +126,15 @@ export class AuthRepository {
     otpExpiration: Date,
     browserName: string,
     deviceType: string,
-  ): Promise<void> {
-    await this.dbWrite.prisma.auth.update({
+  ) {
+    return this.dbWrite.prisma.auth.update({
       data: {
-        authOtp: { update: { otp, expires: otpExpiration } },
+        authOtp: {
+          upsert: {
+            create: { otp, expires: otpExpiration },
+            update: { otp, expires: otpExpiration },
+          },
+        },
         ...(browserName && { browserName }),
         ...(deviceType && { deviceType }),
       },
@@ -133,13 +142,19 @@ export class AuthRepository {
     });
   }
 
+  deleteUserOtp(id: number) {
+    return this.dbWrite.prisma.authOTP.delete({ where: { id } });
+  }
+
   async updateVerifyEmailField(
     authId: number,
-    data: { emailVerified: number; emailVerificationToken?: string },
+    emailVerified: boolean,
+    data: { emailVerificationToken: string },
   ) {
     return this.dbRead.prisma.auth.update({
       where: { id: authId },
       data: {
+        emailVerified,
         verifiedEmail: {
           update: data,
         },
@@ -156,28 +171,57 @@ export class AuthRepository {
       where: { id: authId },
       data: {
         resetPasswordRequest: {
-          update: {
-            token,
-            expires: tokenExpiration,
+          upsert: {
+            create: {
+              token,
+              expires: tokenExpiration,
+            },
+            update: {
+              token,
+              expires: tokenExpiration,
+            },
           },
         },
       },
     });
   }
 
-  async updatePassword(authId: number, password: string) {
+  async updatePassword(
+    authId: number,
+    password: string,
+    deletePasswordReset = false,
+  ) {
     const hash = await bcrypt.hash(password, saltRounds);
-    return this.dbRead.prisma.auth.update({
-      where: { id: authId },
-      data: {
-        authPassword: { update: { hash } },
-        resetPasswordRequest: {
-          update: {
-            token: '',
-            expires: new Date(),
+    if (deletePasswordReset) {
+      return this.dbRead.prisma.auth.update({
+        where: { id: authId },
+        data: {
+          authPassword: { update: { hash } },
+          resetPasswordRequest: {
+            delete: true,
           },
         },
-      },
+      });
+    } else {
+      return this.dbRead.prisma.auth.update({
+        where: { id: authId },
+        data: {
+          authPassword: { update: { hash } },
+        },
+      });
+    }
+  }
+
+  async createSession(
+    authId: number,
+    { accessToken, refreshToken }: Omit<Prisma.AuthSessionCreateInput, 'auth'>,
+  ) {
+    return this.dbWrite.prisma.authSession.create({
+      data: { accessToken, refreshToken, authId },
     });
+  }
+
+  async updateSessionById(id: number, data: Prisma.AuthSessionUpdateInput) {
+    return this.dbWrite.prisma.authSession.update({ data, where: { id } });
   }
 }
