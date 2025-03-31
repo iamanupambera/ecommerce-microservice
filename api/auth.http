@@ -27,7 +27,7 @@ withCredentials: true
   "identifier": "danny",
   "password": "qwerty",
   "browserName": "chrome",
-  "deviceType": "pc",
+  "deviceType": "pc"
 }
 
 ###
@@ -53,6 +53,11 @@ PUT {{baseUrl}}/{{urlPath}}/verify-email
 Content-Type: application/json
 Accept: application/json
 withCredentials: true
+
+{
+  "email": "anupam+12@pitangent.com",
+  "token": "334faab6204d2511da5f902b3f3cffa58651949a"
+}
 
 ###
 PUT {{baseUrl}}/{{urlPath}}/verify-otp/:otp      
