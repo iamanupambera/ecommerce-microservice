@@ -296,7 +296,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
-    const user = await this.authRepository.findByEmail(email, true);
+    const user = await this.authRepository.findByEmail(email);
     if (!user) {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
@@ -405,7 +405,7 @@ export class AuthService {
   }
 
   async verifyOtp({ browserName, deviceType, otp, email }: VerifyOtpDto) {
-    const user = await this.authRepository.findByEmail(email, false, true);
+    const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
       throw new BadRequestException(CommonErrors.UserNotFound);
@@ -459,13 +459,13 @@ export class AuthService {
   }
 
   async verifyEmail({ token, email }: AuthVerifyEmailDto) {
-    const user = await this.authRepository.findByEmail(email, true);
+    const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
-    if (user.resetPasswordRequest.token !== token) {
+    if (user.verifiedEmail?.emailVerificationToken !== token) {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 

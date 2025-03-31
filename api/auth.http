@@ -24,7 +24,7 @@ Accept: application/json
 withCredentials: true
 
 {
-  "identifier": "danny",
+  "identifier": "anupam12",
   "password": "qwerty",
   "browserName": "chrome",
   "deviceType": "pc"

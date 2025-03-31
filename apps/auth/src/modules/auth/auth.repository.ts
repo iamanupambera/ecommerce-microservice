@@ -48,14 +48,15 @@ export class AuthRepository {
     });
   }
 
-  async findByEmail(email: string, token = false, authOtp = false) {
+  async findByEmail(email: string) {
     return this.dbRead.prisma.auth.findUnique({
       where: {
         email,
       },
       include: {
-        resetPasswordRequest: token,
-        authOtp,
+        resetPasswordRequest: true,
+        verifiedEmail: true,
+        authOtp: true,
       },
     });
   }
