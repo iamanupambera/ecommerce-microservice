@@ -6,6 +6,6 @@ export {
 
 export { ExceptionFilter } from './filter/index';
 
-export { ServiceNameENUM } from './shared/index';
+export { ServiceNameENUM, type AuthJwtPayload } from './shared/index';
 
 export { CommonErrors } from './errors/index';

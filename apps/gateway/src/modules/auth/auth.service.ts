@@ -1,5 +1,6 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { AuthJwtPayload } from '@repo/modules/index';
 import { Response } from 'express';
 import { catchError, map } from 'rxjs';
 import { GatewayJwtService } from 'src/modules/gatewayJwt/gatewayJwt.service';
@@ -94,7 +95,7 @@ export class AuthService {
       );
   }
 
-  async getLoginUser(payload: object) {
+  async getLoginUser(user: AuthJwtPayload, userToken: string) {
     return this.authService
       .send<
         object,
@@ -107,10 +108,10 @@ export class AuthService {
       >(
         { controller, cmd: 'getLoginUser' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
-          payload,
-          user: null,
+          payload: null,
+          user,
         },
       )
       .pipe(
@@ -123,7 +124,7 @@ export class AuthService {
       );
   }
 
-  async getRefreshToken(payload: object, res: Response) {
+  async getRefreshToken(res: Response, token: string) {
     return this.authService
       .send<
         object,
@@ -138,7 +139,7 @@ export class AuthService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
-          payload,
+          payload: { token },
           user: null,
         },
       )
@@ -164,7 +165,7 @@ export class AuthService {
       );
   }
 
-  async changePassword(payload: object) {
+  async changePassword(payload: object, user: AuthJwtPayload) {
     return this.authService
       .send<
         object,
@@ -180,7 +181,7 @@ export class AuthService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -263,7 +264,7 @@ export class AuthService {
       );
   }
 
-  async resendVerifyEmail(payload: object) {
+  async resendVerifyEmail() {
     return this.authService
       .send<
         object,
@@ -278,7 +279,7 @@ export class AuthService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
-          payload,
+          payload: null,
           user: null,
         },
       )

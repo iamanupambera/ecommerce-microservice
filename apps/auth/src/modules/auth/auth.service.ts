@@ -10,12 +10,15 @@ import {
   VerifyOtpDto,
 } from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
-import { CommonErrors, LoggerService } from '@repo/modules/index';
+import {
+  AuthJwtPayload,
+  CommonErrors,
+  LoggerService,
+} from '@repo/modules/index';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
 import crypto, { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { AuthJwtPayload } from 'src/shared/interface';
 
 @Injectable()
 export class AuthService {

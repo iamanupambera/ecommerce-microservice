@@ -1,7 +1,20 @@
-import { Controller, Post, Body, Put, Get, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Put,
+  Get,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { Observable } from 'rxjs';
+import { AuthGuard } from '@nestjs/passport';
+import { Cookies } from 'src/shared/decorators/cookies.decorator';
+import { AuthUser } from 'src/shared/decorators/auth-user.decorator';
+import { AuthJwtPayload } from '@repo/modules/index';
+import { BearerToken } from 'src/shared/decorators/bearer-token.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -23,22 +36,30 @@ export class AuthController {
     return this.authService.login(payload, res);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get('current-user')
-  getLoginUser(@Body() payload: object): Promise<Observable<object>> {
-    return this.authService.getLoginUser(payload);
+  getLoginUser(
+    @AuthUser() user: AuthJwtPayload,
+    @BearerToken() bearerToken: string,
+  ): Promise<Observable<object>> {
+    return this.authService.getLoginUser(user, bearerToken);
   }
 
   @Get('refresh-token')
   getRefreshToken(
-    @Body() payload: object,
     @Res({ passthrough: true }) res: Response,
+    @Cookies('refreshToken') refreshToken: string,
   ): Promise<Observable<object>> {
-    return this.authService.getRefreshToken(payload, res);
+    return this.authService.getRefreshToken(res, refreshToken);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put('change-password')
-  changePassword(@Body() payload: object): Promise<Observable<object>> {
-    return this.authService.changePassword(payload);
+  changePassword(
+    @Body() payload: object,
+    @AuthUser() user: AuthJwtPayload,
+  ): Promise<Observable<object>> {
+    return this.authService.changePassword(payload, user);
   }
 
   @Put('verify-email')
@@ -55,8 +76,8 @@ export class AuthController {
   }
 
   @Get('resend-email')
-  resendVerifyEmail(@Body() payload: object) {
-    return this.authService.resendVerifyEmail(payload);
+  resendVerifyEmail() {
+    return this.authService.resendVerifyEmail();
   }
 
   @Put('forgot-password')
@@ -69,6 +90,7 @@ export class AuthController {
     return this.authService.resetPassword(payload);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('refreshToken');

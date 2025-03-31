@@ -57,8 +57,8 @@ export class AuthController {
   }
 
   @MessagePattern({ controller, cmd: 'getLoginUser' })
-  getLoginUser(@Payload('payload') payload: any) {
-    return this.authService.getLoginUser(payload);
+  getLoginUser(@Payload('userToken') token: string) {
+    return this.authService.getLoginUser({ token });
   }
 
   @MessagePattern({ controller, cmd: 'resendVerifyEmail' })
