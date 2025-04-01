@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import {
@@ -10,9 +10,11 @@ import {
   RegisterDto,
   VerifyOtpDto,
 } from '@repo/validator/index';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 const controller = 'auth_controller';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -64,5 +66,10 @@ export class AuthController {
   @MessagePattern({ controller, cmd: 'resendVerifyEmail' })
   resendVerifyEmail(@Payload('payload') payload: AuthForgotPasswordDto) {
     return this.authService.resendVerifyEmail(payload);
+  }
+
+  @MessagePattern({ controller, cmd: 'logout' })
+  logout(@Payload('userToken') token: string) {
+    return this.authService.logout({ token });
   }
 }

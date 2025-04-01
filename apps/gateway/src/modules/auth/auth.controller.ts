@@ -91,14 +91,11 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('refreshToken');
-
-    return {
-      statusCode: 200,
-      response: {},
-      message: 'logout successfully',
-    };
+  @Get('logout')
+  logout(
+    @Res({ passthrough: true }) res: Response,
+    @BearerToken() bearerToken: string,
+  ) {
+    return this.authService.logout(res, bearerToken);
   }
 }

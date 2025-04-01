@@ -225,4 +225,8 @@ export class AuthRepository {
   async updateSessionById(id: number, data: Prisma.AuthSessionUpdateInput) {
     return this.dbWrite.prisma.authSession.update({ data, where: { id } });
   }
+
+  async deleteSessionById(id: number) {
+    return this.dbWrite.prisma.authSession.delete({ where: { id } });
+  }
 }

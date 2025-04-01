@@ -350,4 +350,34 @@ export class AuthService {
         }),
       );
   }
+
+  async logout(res: Response, userToken: string) {
+    return this.authService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller, cmd: 'logout' },
+        {
+          userToken,
+          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
+          payload: null,
+          user: null,
+        },
+      )
+      .pipe(
+        map((response) => {
+          res.clearCookie('refreshToken');
+          return response;
+        }),
+        catchError((err) => {
+          throw new HttpException(err.response, err.status, err.options);
+        }),
+      );
+  }
 }

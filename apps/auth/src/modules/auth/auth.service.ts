@@ -496,10 +496,13 @@ export class AuthService {
     const user = await this.authRepository.findByUsername(data.username);
     const accessTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
     const refreshTokenOtp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
-    const session = await this.authRepository.updateSessionById(user.id, {
-      accessToken: accessTokenOtp,
-      refreshToken: refreshTokenOtp,
-    });
+    const session = await this.authRepository.updateSessionById(
+      data.sessionId,
+      {
+        accessToken: accessTokenOtp,
+        refreshToken: refreshTokenOtp,
+      },
+    );
 
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
@@ -598,6 +601,24 @@ export class AuthService {
       statusCode: 200,
       message: 'Email verification sent',
       response: user,
+    };
+  }
+
+  async logout({ token }: { token: string }) {
+    let data: AuthJwtPayload = null;
+    try {
+      data = this.jwtService.verify<AuthJwtPayload>(token);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      throw new BadRequestException(CommonErrors.UserSessionExpire);
+    }
+
+    await this.authRepository.deleteSessionById(data.id);
+
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'logout successfully',
     };
   }
 }
