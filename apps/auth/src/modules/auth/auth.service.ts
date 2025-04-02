@@ -204,6 +204,9 @@ export class AuthService {
     });
     await this.storeSession(user.id, session.id, session.accessToken);
 
+    await this.authRepository.updateUserById(user.id, {
+      lastActiveAt: new Date(),
+    });
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
       email: user.email,
@@ -425,6 +428,7 @@ export class AuthService {
     await this.authRepository.updateUserById(user.id, {
       browserName,
       deviceType,
+      lastActiveAt: new Date(),
     });
 
     await this.authRepository.deleteUserOtp(user.authOtp.id);
@@ -508,6 +512,9 @@ export class AuthService {
         refreshToken: refreshTokenOtp,
       },
     );
+    await this.authRepository.updateUserById(user.id, {
+      lastActiveAt: new Date(),
+    });
     await this.storeSession(user.id, session.id, session.accessToken);
 
     const accessTokenPayload: AuthJwtPayload = {
@@ -621,6 +628,9 @@ export class AuthService {
 
     await this.redisService.redis.del(`session:${data.id}:${data.sessionId}`);
     await this.authRepository.deleteSessionById(data.id);
+    await this.authRepository.updateUserById(data.id, {
+      lastActiveAt: new Date(),
+    });
 
     return {
       statusCode: 200,
