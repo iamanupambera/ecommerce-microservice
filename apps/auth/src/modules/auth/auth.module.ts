@@ -6,6 +6,8 @@ import { AuthRepository } from './auth.repository';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisModule } from '@repo/modules/index';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       },
     ]),
     PrismaModule,
+    RedisModule,
+    SearchModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository],

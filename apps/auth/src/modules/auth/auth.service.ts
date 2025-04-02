@@ -14,6 +14,7 @@ import {
   AuthJwtPayload,
   CommonErrors,
   LoggerService,
+  RedisService,
 } from '@repo/modules/index';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
@@ -30,6 +31,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly gatewayJwtService: GatewayJwtService,
     private readonly logger: LoggerService,
+    private readonly redisService: RedisService,
   ) {}
 
   async register({
@@ -102,6 +104,7 @@ export class AuthService {
       refreshToken: refreshTokenOtp,
     });
 
+    await this.storeSession(user.id, session.id, session.accessToken);
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
       email: user.email,
@@ -199,6 +202,7 @@ export class AuthService {
       accessToken: accessTokenOtp,
       refreshToken: refreshTokenOtp,
     });
+    await this.storeSession(user.id, session.id, session.accessToken);
 
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
@@ -430,6 +434,7 @@ export class AuthService {
       accessToken: accessTokenOtp,
       refreshToken: refreshTokenOtp,
     });
+    await this.storeSession(user.id, session.id, session.accessToken);
 
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
@@ -503,6 +508,7 @@ export class AuthService {
         refreshToken: refreshTokenOtp,
       },
     );
+    await this.storeSession(user.id, session.id, session.accessToken);
 
     const accessTokenPayload: AuthJwtPayload = {
       id: user.id,
@@ -613,6 +619,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.UserSessionExpire);
     }
 
+    await this.redisService.redis.del(`session:${data.id}:${data.sessionId}`);
     await this.authRepository.deleteSessionById(data.id);
 
     return {
@@ -620,5 +627,26 @@ export class AuthService {
       response: {},
       message: 'logout successfully',
     };
+  }
+
+  /**
+   * function use to store session in redis
+   * @param userId auth user id
+   * @param sessionId login session id
+   * @param otp refresh token otp
+   * @param ttl expiration time
+   */
+  private async storeSession(
+    userId: number,
+    sessionId: number,
+    otp: string,
+    ttl = 1000,
+  ) {
+    await this.redisService.redis.set(
+      `session:${userId}:${sessionId}`,
+      otp,
+      'EX',
+      ttl,
+    );
   }
 }
