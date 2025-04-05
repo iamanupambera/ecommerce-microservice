@@ -25,7 +25,7 @@ export class SellerService {
         { controller, cmd: 'create' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
           user: null,
         },
@@ -54,7 +54,7 @@ export class SellerService {
         { controller, cmd: 'findAll' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
           user: null,
         },
@@ -69,7 +69,7 @@ export class SellerService {
       );
   }
 
-  async findOne(payload: object) {
+  async findOneByUsername(payload: object) {
     return this.userService
       .send<
         object,
@@ -80,10 +80,39 @@ export class SellerService {
           user: object;
         }
       >(
-        { controller, cmd: 'findOne' },
+        { controller, cmd: 'findOneByUsername' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          payload,
+          user: null,
+        },
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        }),
+        catchError((err) => {
+          throw new HttpException(err.response, err.status, err.options);
+        }),
+      );
+  }
+
+  async findOneById(payload: object) {
+    return this.userService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller, cmd: 'findOneById' },
+        {
+          userToken: null,
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
           user: null,
         },
@@ -112,7 +141,7 @@ export class SellerService {
         { controller, cmd: 'update' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: { id, ...payload },
           user: null,
         },

@@ -5,14 +5,24 @@ import { SellerService } from './seller.service';
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createSellerDto: object) {
     return this.sellerService.create(createSellerDto);
   }
 
-  @Get(':id')
+  @Get('random')
+  findAll(@Body() createSellerDto: object) {
+    return this.sellerService.findAll(createSellerDto);
+  }
+
+  @Get('id/:id')
   findOne(@Param('id') id: string) {
-    return this.sellerService.findOne({ id });
+    return this.sellerService.findOneById({ id });
+  }
+
+  @Get('username/:username')
+  findOneByUsername(@Param('username') username: string) {
+    return this.sellerService.findOneByUsername({ username });
   }
 
   @Patch(':id')

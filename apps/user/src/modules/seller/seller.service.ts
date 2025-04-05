@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { SellerRepository } from './seller.repository';
 import { SellerDto } from '@repo/validator/index';
 
@@ -49,6 +53,25 @@ export class SellerService {
 
   async findOneById(id: string) {
     const seller = await this.sellerRepository.getSellerById(id);
+
+    if (!seller) {
+      throw new NotFoundException('seller not found');
+    }
+
+    return {
+      statusCode: 200,
+      response: seller,
+      message: 'Seller profile details',
+    };
+  }
+
+  async findOneByUsername(username: string) {
+    const seller = await this.sellerRepository.getSellerByUsername(username);
+
+    if (!seller) {
+      throw new NotFoundException('seller not found');
+    }
+
     return {
       statusCode: 200,
       response: seller,

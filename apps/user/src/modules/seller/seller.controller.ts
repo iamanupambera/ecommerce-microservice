@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { SellerService } from './seller.service';
 const controller = 'seller';
 
@@ -13,13 +13,18 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'findAll' })
-  findAll() {
-    return this.sellerService.findAll(1);
+  findAll(@Payload('payload') body: any) {
+    return this.sellerService.findAll(body.count);
   }
 
-  @MessagePattern({ controller, cmd: 'findOne' })
-  findOne(@Payload('payload') id: string) {
-    return this.sellerService.findOneById(id);
+  @MessagePattern({ controller, cmd: 'findOneById' })
+  findOneById(@Payload('payload') payload: any) {
+    return this.sellerService.findOneById(payload.id);
+  }
+
+  @MessagePattern({ controller, cmd: 'findOneByUsername' })
+  findOneByUsername(@Payload('payload') payload: any) {
+    return this.sellerService.findOneByUsername(payload.username);
   }
 
   @MessagePattern({ controller, cmd: 'update' })
@@ -47,7 +52,7 @@ export class SellerController {
     return this.sellerService.updateGigsCount(updateSellerDto);
   }
 
-  @MessagePattern({ controller, cmd: 'getReviewFromBuyer' })
+  @EventPattern({ controller, cmd: 'getReviewFromBuyer' })
   getReviewFromBuyer(@Payload('payload') updateSellerDto: any) {
     return this.sellerService.getReviewFromBuyer(updateSellerDto);
   }
