@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
     }),
     GatewayJwtModule,
     AuthModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

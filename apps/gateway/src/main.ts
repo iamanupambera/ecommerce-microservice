@@ -29,7 +29,7 @@ async function bootstrap() {
 }
 
 function setupSecurityMiddleware(app: NestExpressApplication) {
-  app.set('trust proxy', 1); // Trust proxy
+  app.set('trust proxy', 'loopback'); // Trust requests from the loopback address
   app.use(hpp()); // Prevent HTTP Parameter Pollution
   app.use(
     helmet({

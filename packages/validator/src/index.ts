@@ -14,3 +14,5 @@ export {
   ForgotPasswordDto,
   PasswordChangeDto,
 } from './notification';
+
+export { SellerDto } from './user';
