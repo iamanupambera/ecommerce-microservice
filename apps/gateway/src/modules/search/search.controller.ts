@@ -6,11 +6,11 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
   @Get()
   findAll() {
-    return this.searchService.findAll();
+    return this.searchService.findAll({});
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.searchService.findOne(+id);
+    return this.searchService.findOne({ id });
   }
 }

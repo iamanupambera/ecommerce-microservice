@@ -10,7 +10,7 @@ export class SearchController {
 
   @MessagePattern({ controller, cmd: 'findAll' })
   findAll(
-    @Payload()
+    @Payload('payload')
     payload: {
       searchQuery: string;
       pagination: PaginationParams;
@@ -29,7 +29,7 @@ export class SearchController {
   }
 
   @MessagePattern({ controller, cmd: 'findOne' })
-  findOne(@Payload() id: string) {
+  findOne(@Payload('payload') id: string) {
     return this.searchService.findOne(id);
   }
 }

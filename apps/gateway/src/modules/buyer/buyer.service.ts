@@ -2,17 +2,17 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 import { catchError, map } from 'rxjs';
-const controller = 'search';
+const controller = 'buyer';
 
 @Injectable()
-export class SearchService {
+export class BuyerService {
   constructor(
-    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
+    @Inject('USER_SERVICE') private readonly userService: ClientProxy,
     private readonly gatewayJwtService: GatewayJwtService,
   ) {}
 
-  async findAll(payload: object) {
-    return this.authService
+  async getLoginUserBuyerDetails(payload: object) {
+    return this.userService
       .send<
         object,
         {
@@ -22,7 +22,7 @@ export class SearchService {
           user: object;
         }
       >(
-        { controller, cmd: 'findAll' },
+        { controller, cmd: 'getLoginUserBuyerDetails' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
@@ -41,7 +41,7 @@ export class SearchService {
   }
 
   async findOne(payload: object) {
-    return this.authService
+    return this.userService
       .send<
         object,
         {
