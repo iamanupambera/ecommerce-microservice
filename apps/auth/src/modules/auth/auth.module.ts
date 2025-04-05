@@ -37,6 +37,23 @@ import { SearchModule } from '../search/search.module';
         }),
       },
     ]),
+    ClientsModule.registerAsync([
+      {
+        name: 'USER_SERVICE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.getOrThrow<string>('RABBITMQ_ENDPOINT')],
+            queue: configService.getOrThrow<string>('USER_SERVICE_QUEUE'),
+            queueOptions: {
+              durable: false,
+            },
+          },
+        }),
+      },
+    ]),
     PrismaModule,
     RedisModule,
     SearchModule,

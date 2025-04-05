@@ -27,6 +27,8 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private configService: ConfigService,
     @Inject('NOTIFICATION_SERVICE')
+    private readonly userService: ClientProxy,
+    @Inject('NOTIFICATION_SERVICE')
     private readonly notificationService: ClientProxy,
     private readonly jwtService: JwtService,
     private readonly gatewayJwtService: GatewayJwtService,
@@ -63,6 +65,41 @@ export class AuthService {
       deviceType,
       lastActiveAt: new Date(),
     });
+
+    // create user default as buyer
+    this.userService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'buyer', cmd: 'create' },
+        {
+          userToken: null,
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          payload: {
+            username: user.username,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            country: user.country,
+            createdAt: user.createdAt,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (error) => {
+          this.logger.log(
+            'error',
+            AuthService.name + ' service error at auth register',
+            error,
+          );
+        },
+      });
 
     // send mail to user to verify email
     this.notificationService

@@ -8,7 +8,7 @@ export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
   @MessagePattern({ controller, cmd: 'create' })
-  create(@Payload() createSellerDto: any) {
+  create(@Payload('payload') createSellerDto: any) {
     return this.sellerService.create(createSellerDto);
   }
 
@@ -18,12 +18,37 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'findOne' })
-  findOne(@Payload() id: string) {
+  findOne(@Payload('payload') id: string) {
     return this.sellerService.findOneById(id);
   }
 
   @MessagePattern({ controller, cmd: 'update' })
-  update(@Payload() updateSellerDto: any) {
+  update(@Payload('payload') updateSellerDto: any) {
     return this.sellerService.update(updateSellerDto.id, updateSellerDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'createOrder' })
+  createOrder(@Payload('payload') updateSellerDto: any) {
+    return this.sellerService.createOrder(updateSellerDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'approveOrder' })
+  approveOrder(@Payload('payload') updateSellerDto: any) {
+    return this.sellerService.approveOrder(updateSellerDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'cancelOrder' })
+  cancelOrder(@Payload('payload') updateSellerDto: any) {
+    return this.sellerService.cancelOrder(updateSellerDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'updateGigsCount' })
+  updateGigsCount(@Payload('payload') updateSellerDto: any) {
+    return this.sellerService.updateGigsCount(updateSellerDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'getReviewFromBuyer' })
+  getReviewFromBuyer(@Payload('payload') updateSellerDto: any) {
+    return this.sellerService.getReviewFromBuyer(updateSellerDto);
   }
 }

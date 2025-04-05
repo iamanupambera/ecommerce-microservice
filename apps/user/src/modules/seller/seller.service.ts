@@ -75,4 +75,80 @@ export class SellerService {
       message: 'Seller created successfully.',
     };
   }
+
+  async createOrder({ sellerId, ongoingJobs }) {
+    const newOrder = await this.sellerRepository.updateSellerOngoingJobsCount(
+      sellerId,
+      ongoingJobs,
+    );
+
+    return {
+      statusCode: 200,
+      response: newOrder,
+      message: 'order created successfully.',
+    };
+  }
+
+  async approveOrder({
+    sellerId,
+    ongoingJobs,
+    completedJobs,
+    totalEarnings,
+    recentDelivery,
+  }) {
+    const updateOrder =
+      await this.sellerRepository.updateSellerCompletedJobsProp({
+        sellerId,
+        ongoingJobs,
+        completedJobs,
+        totalEarnings,
+        recentDelivery,
+      });
+
+    return {
+      statusCode: 200,
+      response: updateOrder,
+      message: 'order approve successfully.',
+    };
+  }
+
+  async updateGigsCount({ gigSellerId, count }) {
+    const updateCount = await this.sellerRepository.updateTotalGigsCount(
+      `${gigSellerId}`,
+      count,
+    );
+
+    return {
+      statusCode: 200,
+      response: updateCount,
+      message: 'count update successfully.',
+    };
+  }
+
+  async cancelOrder({ sellerId }) {
+    const cancelOrder =
+      await this.sellerRepository.updateSellerCancelledJobs(sellerId);
+
+    return {
+      statusCode: 200,
+      response: cancelOrder,
+      message: 'order cancel successfully.',
+    };
+  }
+
+  async getReviewFromBuyer({ rating, sellerId }) {
+    const newRating = await this.sellerRepository.updateSellerReview({
+      rating,
+      sellerId,
+    });
+    // // here add gig service to update get from buyer
+    // 'update-gig',
+    // JSON.stringify({ rating, sellerId }),
+
+    return {
+      statusCode: 200,
+      response: newRating,
+      message: 'success',
+    };
+  }
 }
