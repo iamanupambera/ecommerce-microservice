@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthEmailService } from './auth-email.service';
 import {
@@ -7,10 +7,12 @@ import {
   ForgotPasswordDto,
   PasswordChangeDto,
 } from '@repo/validator/index';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 
 const controller = 'auth_email_controller';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class AuthEmailController {
   constructor(private readonly authEmailService: AuthEmailService) {}
 

@@ -1,10 +1,12 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BuyerService } from './buyer.service';
 import { AuthJwtPayload } from '@repo/modules/index';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 const controller = 'buyer';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class BuyerController {
   constructor(private readonly buyerService: BuyerService) {}
 

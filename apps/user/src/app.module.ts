@@ -5,6 +5,7 @@ import { LoggerModule } from '@repo/modules/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SellerModule } from './modules/seller/seller.module';
 import { BuyerModule } from './modules/buyer/buyer.module';
+import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BuyerModule } from './modules/buyer/buyer.module';
     }),
     SellerModule,
     BuyerModule,
+    GatewayJwtModule,
   ],
   controllers: [AppController],
   providers: [AppService],

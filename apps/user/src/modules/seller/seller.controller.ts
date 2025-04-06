@@ -1,9 +1,11 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { SellerService } from './seller.service';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 const controller = 'seller';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 

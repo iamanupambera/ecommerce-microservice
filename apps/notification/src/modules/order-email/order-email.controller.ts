@@ -1,8 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrderEmailService } from './order-email.service';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class OrderEmailController {
   constructor(private readonly orderEmailService: OrderEmailService) {}
 
