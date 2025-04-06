@@ -54,10 +54,16 @@ export class SellerRepository {
     return this.dbWrite.prisma.seller.create({
       data: {
         ...sellerData,
-        languages: { createMany: { data: languages } },
+        ...(languages.length && {
+          languages: { createMany: { data: languages } },
+        }),
         experience: { createMany: { data: experiences } },
         education: { createMany: { data: educations } },
-        certificates: { createMany: { data: certificates } },
+        ...(certificates.length && {
+          certificate: {
+            certificates: { createMany: { data: certificates } },
+          },
+        }),
       },
     });
   }

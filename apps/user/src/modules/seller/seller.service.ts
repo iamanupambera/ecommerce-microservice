@@ -5,30 +5,30 @@ import {
 } from '@nestjs/common';
 import { SellerRepository } from './seller.repository';
 import { SellerDto } from '@repo/validator/index';
+import { AuthJwtPayload } from '@repo/modules/index';
 
 @Injectable()
 export class SellerService {
   constructor(private sellerRepository: SellerRepository) {}
 
-  async create({
-    languages,
-    experience,
-    education,
-    certificates,
-    ...seller
-  }: SellerDto) {
-    const checkIfSellerExist = await this.sellerRepository.getSellerByEmail(
-      seller.email,
-    );
-
-    if (checkIfSellerExist) {
-      throw new BadRequestException(
-        'Seller already exist. Go to your account page to update.',
+  async create(
+    { languages, experience, education, certificates, ...seller }: SellerDto,
+    { username, email }: AuthJwtPayload,
+  ) {
+    if (seller.email) {
+      const checkIfSellerExist = await this.sellerRepository.getSellerByEmail(
+        seller.email,
       );
+
+      if (checkIfSellerExist) {
+        throw new BadRequestException(
+          'Seller already exist. Go to your account page to update.',
+        );
+      }
     }
 
     const createdSeller = await this.sellerRepository.createSeller(
-      seller,
+      { ...seller, username, email },
       languages,
       experience,
       education,

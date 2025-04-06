@@ -2,6 +2,8 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { SellerService } from './seller.service';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { SellerDto } from '@repo/validator/index';
+import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'seller';
 
 @Controller()
@@ -10,8 +12,11 @@ export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
   @MessagePattern({ controller, cmd: 'create' })
-  create(@Payload('payload') createSellerDto: any) {
-    return this.sellerService.create(createSellerDto);
+  create(
+    @Payload('payload') createSellerDto: SellerDto,
+    @Payload('user') user: AuthJwtPayload,
+  ) {
+    return this.sellerService.create(createSellerDto, user);
   }
 
   @MessagePattern({ controller, cmd: 'findAll' })

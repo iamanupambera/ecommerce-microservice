@@ -33,11 +33,11 @@ class ExperienceDto {
   title: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsDateString()
   startDate: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsDateString()
   endDate: string;
 
   @IsNotEmpty()
@@ -152,7 +152,7 @@ export class SellerDto {
   @IsString({ each: true })
   skills: string[];
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => LanguageDto)
@@ -177,12 +177,12 @@ export class SellerDto {
   @Type(() => EducationDto)
   education: EducationDto[];
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsArray()
   @IsString({ each: true })
   socialLinks: string[];
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CertificateDto)
