@@ -68,8 +68,8 @@ export class AuthController {
   }
 
   @MessagePattern({ controller, cmd: 'resendVerifyEmail' })
-  resendVerifyEmail(@Payload('payload') payload: AuthForgotPasswordDto) {
-    return this.authService.resendVerifyEmail(payload);
+  resendVerifyEmail(@Payload('user') user: AuthJwtPayload) {
+    return this.authService.resendVerifyEmail(user);
   }
 
   @MessagePattern({ controller, cmd: 'logout' })

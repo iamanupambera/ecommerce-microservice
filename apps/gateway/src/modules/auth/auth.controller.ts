@@ -77,9 +77,10 @@ export class AuthController {
     return this.authService.verifyOTP({ ...payload, otp }, res);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get('resend-email')
-  resendVerifyEmail() {
-    return this.authService.resendVerifyEmail();
+  resendVerifyEmail(@AuthUser() user: AuthJwtPayload) {
+    return this.authService.resendVerifyEmail(user);
   }
 
   @Put('forgot-password')

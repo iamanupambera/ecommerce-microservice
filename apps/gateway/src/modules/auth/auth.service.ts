@@ -264,7 +264,7 @@ export class AuthService {
       );
   }
 
-  async resendVerifyEmail() {
+  async resendVerifyEmail(user: AuthJwtPayload) {
     return this.authService
       .send<
         object,
@@ -280,7 +280,7 @@ export class AuthService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
           payload: null,
-          user: null,
+          user,
         },
       )
       .pipe(

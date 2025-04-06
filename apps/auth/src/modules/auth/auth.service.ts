@@ -410,6 +410,12 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
+    if (await this.authRepository.isValidatePassword(user, newPassword)) {
+      throw new BadRequestException(
+        'current password and new password is same',
+      );
+    }
+
     await this.authRepository.updatePassword(user.id, newPassword);
 
     // send mail to user to notify
@@ -603,11 +609,15 @@ export class AuthService {
     return { statusCode: 200, message: 'Authenticated user', response: user };
   }
 
-  async resendVerifyEmail({ email }: { email: string }) {
+  async resendVerifyEmail({ email }: AuthJwtPayload) {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
       throw new BadRequestException(CommonErrors.UserNotFound);
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email already verified');
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
