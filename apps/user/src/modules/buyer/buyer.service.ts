@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BuyerRepository } from './buyer.repository';
 import { CommonErrors } from '@repo/modules/index';
 
@@ -30,6 +34,11 @@ export class BuyerService {
 
   async getLoginUserBuyerDetails(email: string) {
     const buyer = await this.buyerRepository.getBuyerByEmail(email);
+
+    if (!buyer) {
+      throw new NotFoundException('buyer not found');
+    }
+
     return {
       statusCode: 200,
       response: buyer,
@@ -39,6 +48,11 @@ export class BuyerService {
 
   async findOne(username: string) {
     const buyer = await this.buyerRepository.getBuyerByUsername(username);
+
+    if (!buyer) {
+      throw new NotFoundException('buyer not found');
+    }
+
     return {
       statusCode: 200,
       response: buyer,

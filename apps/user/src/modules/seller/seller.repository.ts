@@ -38,7 +38,7 @@ export class SellerRepository {
 
   async getRandomSellers(size: number) {
     return this.dbRead.prisma.$runCommandRaw({
-      aggregate: 'Buyer',
+      aggregate: 'sellers',
       pipeline: [{ $sample: { size } }],
       cursor: {},
     });
@@ -87,10 +87,12 @@ export class SellerRepository {
         bio: sellerData.bio,
         responseTime: sellerData.responseTime,
         socialLinks: sellerData.socialLinks,
-        languages: {
-          deleteMany: {},
-          createMany: { data: languages },
-        },
+        ...(languages.length && {
+          languages: {
+            deleteMany: {},
+            createMany: { data: languages },
+          },
+        }),
         experience: {
           deleteMany: {},
           createMany: { data: experiences },
@@ -99,10 +101,12 @@ export class SellerRepository {
           deleteMany: {},
           createMany: { data: educations },
         },
-        certificates: {
-          deleteMany: {},
-          createMany: { data: certificates },
-        },
+        ...(certificates.length && {
+          certificates: {
+            deleteMany: {},
+            createMany: { data: certificates },
+          },
+        }),
       },
     });
   }

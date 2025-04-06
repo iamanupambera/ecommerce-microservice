@@ -118,6 +118,10 @@ class RatingsDto {
 }
 
 export class SellerDto {
+  @IsOptional()
+  @IsString()
+  id: string;
+
   @IsNotEmpty()
   @IsString()
   fullName: string;

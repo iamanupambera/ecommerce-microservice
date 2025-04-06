@@ -83,6 +83,10 @@ export class SellerService {
     id: string,
     { languages, experience, education, certificates, ...seller }: SellerDto,
   ) {
+    if (!id || !(await this.sellerRepository.getSellerById(id))) {
+      throw new NotFoundException('seller not found');
+    }
+
     const updatedSeller = await this.sellerRepository.updateSellerById(
       id,
       seller,

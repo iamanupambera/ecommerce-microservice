@@ -20,8 +20,8 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'findAll' })
-  findAll(@Payload('payload') body: any) {
-    return this.sellerService.findAll(body.count);
+  findAll(@Payload('payload') body: { size: string }) {
+    return this.sellerService.findAll(+body.size);
   }
 
   @MessagePattern({ controller, cmd: 'findOneById' })
@@ -35,7 +35,7 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'update' })
-  update(@Payload('payload') updateSellerDto: any) {
+  update(@Payload('payload') updateSellerDto: SellerDto) {
     return this.sellerService.update(updateSellerDto.id, updateSellerDto);
   }
 

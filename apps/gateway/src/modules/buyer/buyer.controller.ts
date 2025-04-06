@@ -14,8 +14,11 @@ export class BuyerController {
     return this.buyerService.getLoginUserBuyerDetails({}, user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string, @AuthUser() user: AuthJwtPayload) {
-    return this.buyerService.findOne({ id }, user);
+  @Get(':username')
+  findOne(
+    @Param('username') username: string,
+    @AuthUser() user: AuthJwtPayload,
+  ) {
+    return this.buyerService.findOne({ username }, user);
   }
 }

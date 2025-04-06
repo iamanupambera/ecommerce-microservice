@@ -22,9 +22,9 @@ export class SellerController {
     return this.sellerService.create(createSellerDto, user);
   }
 
-  @Get('random')
-  findAll(@Body() createSellerDto: object, @AuthUser() user: AuthJwtPayload) {
-    return this.sellerService.findAll(createSellerDto, user);
+  @Get('random/:size')
+  findAll(@AuthUser() user: AuthJwtPayload, @Param('size') size: number) {
+    return this.sellerService.findAll({ size }, user);
   }
 
   @Get('id/:id')
