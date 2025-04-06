@@ -13,10 +13,6 @@ export class VerifyOtpDto {
 
   @IsNotEmpty()
   @IsString()
-  profilePicture: string;
-
-  @IsNotEmpty()
-  @IsString()
   browserName: string;
 
   @IsNotEmpty()

@@ -6,6 +6,7 @@ import {
   Get,
   Res,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
@@ -71,8 +72,9 @@ export class AuthController {
   verifyOtp(
     @Body() payload: object,
     @Res({ passthrough: true }) res: Response,
+    @Param('otp') otp: string,
   ): Promise<Observable<object>> {
-    return this.authService.verifyOTP(payload, res);
+    return this.authService.verifyOTP({ ...payload, otp }, res);
   }
 
   @Get('resend-email')

@@ -191,7 +191,7 @@ export class AuthService {
     delete user.authPassword;
 
     if (browserName !== user.browserName || deviceType !== user.deviceType) {
-      const otp = randomInt(10 ** 5, 10 ** 6 - 1);
+      const otp = randomInt(10 ** 5, 10 ** 6 - 1).toString();
 
       // user login from different device send verify email
       this.notificationService
@@ -221,7 +221,7 @@ export class AuthService {
 
       const date: Date = new Date();
       date.setMinutes(date.getMinutes() + 10);
-      await this.authRepository.updateUserOTP(user.id, `${otp}`, date, '', '');
+      await this.authRepository.updateUserOTP(user.id, otp, date, '', '');
 
       return {
         statusCode: 200,
@@ -404,7 +404,9 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
-    if (await this.authRepository.isValidatePassword(user, currentPassword)) {
+    if (
+      !(await this.authRepository.isValidatePassword(user, currentPassword))
+    ) {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 
@@ -421,7 +423,7 @@ export class AuthService {
           user: object;
         }
       >(
-        { controller: 'auth_email_controller', cmd: 'changePassword' },
+        { controller: 'auth_email_controller', cmd: 'passwordChange' },
         {
           userToken: null,
           serviceToken:
@@ -457,7 +459,7 @@ export class AuthService {
       throw new BadRequestException(CommonErrors.UserNotFound);
     }
 
-    if (user.authOtp.otp !== otp) {
+    if (user?.authOtp?.otp !== otp) {
       throw new BadRequestException(CommonErrors.InvalidCredential);
     }
 

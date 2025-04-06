@@ -118,7 +118,6 @@ export default function OtpEmail({
                                     </table>
                                   </td>
                                 </tr>
-
                                 <tr>
                                   <td
                                     style={{
@@ -130,7 +129,7 @@ export default function OtpEmail({
                                   >
                                     <p>
                                       Hi {username},<br />
-                                      Your 6-Digit verification code is
+                                      Your 6-Digit verification code is:
                                       <strong>{otp}</strong>
                                       <br />
                                       This code was sent to you to verify your
