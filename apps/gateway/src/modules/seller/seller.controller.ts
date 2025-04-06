@@ -1,32 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { SellerService } from './seller.service';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUser } from 'src/shared/decorators/auth-user.decorator';
+import { AuthJwtPayload } from '@repo/modules/index';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
   @Post('create')
-  create(@Body() createSellerDto: object) {
-    return this.sellerService.create(createSellerDto);
+  create(@Body() createSellerDto: object, @AuthUser() user: AuthJwtPayload) {
+    return this.sellerService.create(createSellerDto, user);
   }
 
   @Get('random')
-  findAll(@Body() createSellerDto: object) {
-    return this.sellerService.findAll(createSellerDto);
+  findAll(@Body() createSellerDto: object, @AuthUser() user: AuthJwtPayload) {
+    return this.sellerService.findAll(createSellerDto, user);
   }
 
   @Get('id/:id')
-  findOne(@Param('id') id: string) {
-    return this.sellerService.findOneById({ id });
+  findOne(@Param('id') id: string, @AuthUser() user: AuthJwtPayload) {
+    return this.sellerService.findOneById({ id }, user);
   }
 
   @Get('username/:username')
-  findOneByUsername(@Param('username') username: string) {
-    return this.sellerService.findOneByUsername({ username });
+  findOneByUsername(
+    @Param('username') username: string,
+    @AuthUser() user: AuthJwtPayload,
+  ) {
+    return this.sellerService.findOneByUsername({ username }, user);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSellerDto: object) {
-    return this.sellerService.update(id, updateSellerDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateSellerDto: object,
+    @AuthUser() user: AuthJwtPayload,
+  ) {
+    return this.sellerService.update(id, updateSellerDto, user);
   }
 }

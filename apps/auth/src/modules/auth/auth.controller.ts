@@ -11,6 +11,7 @@ import {
   VerifyOtpDto,
 } from '@repo/validator/index';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'auth_controller';
 
 @Controller()
@@ -39,8 +40,11 @@ export class AuthController {
   }
 
   @MessagePattern({ controller, cmd: 'changePassword' })
-  changePassword(@Payload('payload') createAuthDto: ChangePasswordDTO) {
-    return this.authService.changePassword(createAuthDto);
+  changePassword(
+    @Payload('payload') createAuthDto: ChangePasswordDTO,
+    @Payload('user') user: AuthJwtPayload,
+  ) {
+    return this.authService.changePassword(createAuthDto, user.username);
   }
 
   @MessagePattern({ controller, cmd: 'verifyOtp' })

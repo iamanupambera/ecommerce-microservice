@@ -394,11 +394,10 @@ export class AuthService {
     };
   }
 
-  async changePassword({
-    username,
-    newPassword,
-    currentPassword,
-  }: ChangePasswordDTO) {
+  async changePassword(
+    { newPassword, currentPassword }: ChangePasswordDTO,
+    username: string,
+  ) {
     const user = await this.authRepository.getUserWithPassword(username);
 
     if (!user) {
@@ -422,7 +421,7 @@ export class AuthService {
           user: object;
         }
       >(
-        { controller: 'auth_email_controller', cmd: 'passwordChange' },
+        { controller: 'auth_email_controller', cmd: 'changePassword' },
         {
           userToken: null,
           serviceToken:
@@ -687,7 +686,7 @@ export class AuthService {
     userId: number,
     sessionId: number,
     otp: string,
-    ttl = 1000,
+    ttl = 3600, // one hour expiry time
   ) {
     await this.redisService.redis.set(
       `session:${userId}:${sessionId}`,

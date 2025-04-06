@@ -2,6 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 import { catchError, map } from 'rxjs';
+import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'seller';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class SellerService {
     private readonly gatewayJwtService: GatewayJwtService,
   ) {}
 
-  async create(payload: object) {
+  async create(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -27,7 +28,7 @@ export class SellerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -40,7 +41,7 @@ export class SellerService {
       );
   }
 
-  async findAll(payload: object) {
+  async findAll(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -56,7 +57,7 @@ export class SellerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -69,7 +70,7 @@ export class SellerService {
       );
   }
 
-  async findOneByUsername(payload: object) {
+  async findOneByUsername(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -85,7 +86,7 @@ export class SellerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -98,7 +99,7 @@ export class SellerService {
       );
   }
 
-  async findOneById(payload: object) {
+  async findOneById(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -114,7 +115,7 @@ export class SellerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -127,7 +128,7 @@ export class SellerService {
       );
   }
 
-  async update(id: string, payload: object) {
+  async update(id: string, payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -143,7 +144,7 @@ export class SellerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: { id, ...payload },
-          user: null,
+          user,
         },
       )
       .pipe(

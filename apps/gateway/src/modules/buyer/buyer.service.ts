@@ -2,6 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 import { catchError, map } from 'rxjs';
+import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'buyer';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class BuyerService {
     private readonly gatewayJwtService: GatewayJwtService,
   ) {}
 
-  async getLoginUserBuyerDetails(payload: object) {
+  async getLoginUserBuyerDetails(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -27,7 +28,7 @@ export class BuyerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
@@ -40,7 +41,7 @@ export class BuyerService {
       );
   }
 
-  async findOne(payload: object) {
+  async findOne(payload: object, user: AuthJwtPayload) {
     return this.userService
       .send<
         object,
@@ -56,7 +57,7 @@ export class BuyerService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload,
-          user: null,
+          user,
         },
       )
       .pipe(
