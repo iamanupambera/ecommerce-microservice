@@ -89,8 +89,11 @@ export class AuthController {
   }
 
   @Put('reset-password/:token')
-  resetPassword(@Body() payload: object): Promise<Observable<object>> {
-    return this.authService.resetPassword(payload);
+  resetPassword(
+    @Body() payload: object,
+    @Param('token') token: string,
+  ): Promise<Observable<object>> {
+    return this.authService.resetPassword({ ...payload, token });
   }
 
   @UseGuards(AuthGuard('jwt'))

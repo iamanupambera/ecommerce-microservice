@@ -25,7 +25,7 @@ export class SearchService {
         { controller, cmd: 'findAll' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
           payload,
           user: null,
         },
@@ -54,7 +54,7 @@ export class SearchService {
         { controller, cmd: 'findOne' },
         {
           userToken: null,
-          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          serviceToken: await this.gatewayJwtService.generateToken('AUTH'),
           payload,
           user: null,
         },

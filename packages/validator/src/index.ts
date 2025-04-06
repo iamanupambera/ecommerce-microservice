@@ -16,3 +16,5 @@ export {
 } from './notification';
 
 export { SellerDto } from './user';
+
+export { GigsSearchDto } from './search';

@@ -1,23 +1,19 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SearchService } from './search.service';
-import { PaginationParams } from './types/search.types';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GigsSearchDto } from '@repo/validator/index';
 const controller = 'search';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @MessagePattern({ controller, cmd: 'findAll' })
   findAll(
     @Payload('payload')
-    payload: {
-      searchQuery: string;
-      pagination: PaginationParams;
-      deliveryTime?: string;
-      min?: number;
-      max?: number;
-    },
+    payload: GigsSearchDto,
   ) {
     return this.searchService.findAll(
       payload.searchQuery,
