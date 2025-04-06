@@ -5,12 +5,22 @@ import {
 } from '@nestjs/common';
 import { BuyerRepository } from './buyer.repository';
 import { CommonErrors } from '@repo/modules/index';
+import {
+  BuyerPurchasedGigUpdateDto,
+  CreateBuyerDto,
+} from '@repo/validator/index';
 
 @Injectable()
 export class BuyerService {
   constructor(private buyerRepository: BuyerRepository) {}
 
-  async create({ username, email, profilePicture, country, createdAt }) {
+  async create({
+    username,
+    email,
+    profilePicture,
+    country,
+    createdAt,
+  }: CreateBuyerDto) {
     if (
       (await this.buyerRepository.getBuyerByEmail(email)) ||
       (await this.buyerRepository.getBuyerByUsername(username))
@@ -60,11 +70,15 @@ export class BuyerService {
     };
   }
 
-  async buyerPurchasedGigs({ buyerId, purchasedGigs, type }) {
+  async buyerPurchasedGigs({
+    buyerId,
+    purchasedGigId,
+    type,
+  }: BuyerPurchasedGigUpdateDto) {
     const buyerPurchases =
       await this.buyerRepository.updateBuyerPurchasedGigsProp(
         buyerId,
-        purchasedGigs,
+        purchasedGigId,
         type,
       );
 

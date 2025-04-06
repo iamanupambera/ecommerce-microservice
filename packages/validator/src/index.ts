@@ -15,6 +15,6 @@ export {
   PasswordChangeDto,
 } from './notification';
 
-export { SellerDto } from './user';
+export { SellerDto, CreateBuyerDto, BuyerPurchasedGigUpdateDto } from './user';
 
 export { GigsSearchDto } from './search';

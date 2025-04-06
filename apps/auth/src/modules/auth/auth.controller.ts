@@ -58,7 +58,7 @@ export class AuthController {
   }
 
   @MessagePattern({ controller, cmd: 'getRefreshToken' })
-  getRefreshToken(@Payload('payload') payload: any) {
+  getRefreshToken(@Payload('payload') payload: { token: string }) {
     return this.authService.getRefreshToken(payload);
   }
 

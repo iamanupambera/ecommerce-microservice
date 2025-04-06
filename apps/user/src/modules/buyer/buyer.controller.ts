@@ -3,6 +3,10 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BuyerService } from './buyer.service';
 import { AuthJwtPayload } from '@repo/modules/index';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import {
+  BuyerPurchasedGigUpdateDto,
+  CreateBuyerDto,
+} from '@repo/validator/index';
 const controller = 'buyer';
 
 @Controller()
@@ -11,7 +15,7 @@ export class BuyerController {
   constructor(private readonly buyerService: BuyerService) {}
 
   @MessagePattern({ controller, cmd: 'create' })
-  create(@Payload('payload') payload: any) {
+  create(@Payload('payload') payload: CreateBuyerDto) {
     return this.buyerService.create(payload);
   }
 
@@ -26,7 +30,7 @@ export class BuyerController {
   }
 
   @MessagePattern({ controller, cmd: 'buyerPurchasedGigs' })
-  buyerPurchasedGigs(@Payload('payload') payload: any) {
+  buyerPurchasedGigs(@Payload('payload') payload: BuyerPurchasedGigUpdateDto) {
     return this.buyerService.buyerPurchasedGigs(payload);
   }
 }
