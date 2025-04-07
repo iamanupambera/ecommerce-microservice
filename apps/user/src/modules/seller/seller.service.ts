@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { SellerRepository } from './seller.repository';
 import {
@@ -12,7 +12,7 @@ import {
   SellerDto,
   UpdateGigsCountDto,
 } from '@repo/validator/index';
-import { AuthJwtPayload } from '@repo/modules/index';
+import { AuthJwtPayload, CommonErrors } from '@repo/modules/index';
 
 @Injectable()
 export class SellerService {
@@ -23,14 +23,12 @@ export class SellerService {
     { username, email }: AuthJwtPayload,
   ) {
     if (seller.email) {
-      const checkIfSellerExist = await this.sellerRepository.getSellerByEmail(
+      const existingSeller = await this.sellerRepository.getSellerByEmail(
         seller.email,
       );
 
-      if (checkIfSellerExist) {
-        throw new BadRequestException(
-          'Seller already exist. Go to your account page to update.',
-        );
+      if (existingSeller) {
+        throw new ConflictException(CommonErrors.SellerAlreadyExists);
       }
     }
 
@@ -45,7 +43,7 @@ export class SellerService {
     return {
       statusCode: 201,
       response: createdSeller,
-      message: 'Seller created successfully.',
+      message: 'Seller created successfully',
     };
   }
 
@@ -54,7 +52,7 @@ export class SellerService {
     return {
       statusCode: 200,
       response: sellers,
-      message: 'Random sellers profile',
+      message: 'Random sellers retrieved successfully',
     };
   }
 
@@ -62,13 +60,13 @@ export class SellerService {
     const seller = await this.sellerRepository.getSellerById(id);
 
     if (!seller) {
-      throw new NotFoundException('seller not found');
+      throw new NotFoundException(CommonErrors.SellerNotFound);
     }
 
     return {
       statusCode: 200,
       response: seller,
-      message: 'Seller profile details',
+      message: 'Seller details retrieved successfully',
     };
   }
 
@@ -76,13 +74,13 @@ export class SellerService {
     const seller = await this.sellerRepository.getSellerByUsername(username);
 
     if (!seller) {
-      throw new NotFoundException('seller not found');
+      throw new NotFoundException(CommonErrors.SellerNotFound);
     }
 
     return {
       statusCode: 200,
       response: seller,
-      message: 'Seller profile details',
+      message: 'Seller details retrieved successfully',
     };
   }
 
@@ -90,8 +88,9 @@ export class SellerService {
     id: string,
     { languages, experience, education, certificates, ...seller }: SellerDto,
   ) {
-    if (!id || !(await this.sellerRepository.getSellerById(id))) {
-      throw new NotFoundException('seller not found');
+    const existingSeller = await this.sellerRepository.getSellerById(id);
+    if (!existingSeller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
     }
 
     const updatedSeller = await this.sellerRepository.updateSellerById(
@@ -106,11 +105,16 @@ export class SellerService {
     return {
       statusCode: 200,
       response: updatedSeller,
-      message: 'Seller created successfully.',
+      message: 'Seller updated successfully',
     };
   }
 
   async createOrder({ sellerId, ongoingJobs }: CreateOrderDto) {
+    const seller = await this.sellerRepository.getSellerById(sellerId);
+    if (!seller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
+    }
+
     const newOrder = await this.sellerRepository.updateSellerOngoingJobsCount(
       sellerId,
       ongoingJobs,
@@ -119,7 +123,7 @@ export class SellerService {
     return {
       statusCode: 200,
       response: newOrder,
-      message: 'order created successfully.',
+      message: 'Order created successfully',
     };
   }
 
@@ -130,6 +134,11 @@ export class SellerService {
     totalEarnings,
     recentDelivery,
   }: ApproveOrderDto) {
+    const seller = await this.sellerRepository.getSellerById(sellerId);
+    if (!seller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
+    }
+
     const updateOrder =
       await this.sellerRepository.updateSellerCompletedJobsProp({
         sellerId,
@@ -142,11 +151,16 @@ export class SellerService {
     return {
       statusCode: 200,
       response: updateOrder,
-      message: 'order approve successfully.',
+      message: 'Order approved successfully',
     };
   }
 
   async updateGigsCount({ gigSellerId, count }: UpdateGigsCountDto) {
+    const seller = await this.sellerRepository.getSellerById(gigSellerId);
+    if (!seller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
+    }
+
     const updateCount = await this.sellerRepository.updateTotalGigsCount(
       gigSellerId,
       count,
@@ -155,22 +169,32 @@ export class SellerService {
     return {
       statusCode: 200,
       response: updateCount,
-      message: 'count update successfully.',
+      message: 'Gig count updated successfully',
     };
   }
 
   async cancelOrder({ sellerId }: CancelOrderDto) {
+    const seller = await this.sellerRepository.getSellerById(sellerId);
+    if (!seller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
+    }
+
     const cancelOrder =
       await this.sellerRepository.updateSellerCancelledJobs(sellerId);
 
     return {
       statusCode: 200,
       response: cancelOrder,
-      message: 'order cancel successfully.',
+      message: 'Order cancelled successfully',
     };
   }
 
   async getReviewFromBuyer({ rating, sellerId }: GetReviewFromBuyerDto) {
+    const seller = await this.sellerRepository.getSellerById(sellerId);
+    if (!seller) {
+      throw new NotFoundException(CommonErrors.SellerNotFound);
+    }
+
     const newRating = await this.sellerRepository.updateSellerReview({
       rating,
       sellerId,
@@ -182,7 +206,7 @@ export class SellerService {
     return {
       statusCode: 200,
       response: newRating,
-      message: 'success',
+      message: 'Review updated successfully',
     };
   }
 }

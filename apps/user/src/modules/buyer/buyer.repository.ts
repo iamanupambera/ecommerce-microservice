@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaReadService } from '../prisma/prisma-read.service';
 import { PrismaWriteService } from '../prisma/prisma-write.service';
 import { Prisma } from '@prisma/client';
+import { CommonErrors } from '@repo/modules/index';
 
 @Injectable()
 export class BuyerRepository {
@@ -13,6 +14,12 @@ export class BuyerRepository {
   getBuyerByEmail(email: string) {
     return this.dbRead.prisma.buyer.findUnique({
       where: { email },
+    });
+  }
+
+  getBuyerById(id: string) {
+    return this.dbRead.prisma.buyer.findUnique({
+      where: { id },
     });
   }
 
@@ -65,7 +72,7 @@ export class BuyerRepository {
     });
 
     if (!buyer) {
-      throw new NotFoundException('Buyer not found');
+      throw new NotFoundException(CommonErrors.BuyerNotFound);
     }
 
     const updatedPurchasedGigs = buyer.purchasedGigs.filter(

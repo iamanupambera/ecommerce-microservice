@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -25,7 +25,7 @@ export class BuyerService {
       (await this.buyerRepository.getBuyerByEmail(email)) ||
       (await this.buyerRepository.getBuyerByUsername(username))
     ) {
-      throw new BadRequestException(CommonErrors.UserAlreadyExists);
+      throw new ConflictException(CommonErrors.EmailOrUserNameAlreadyExist);
     }
     const buyer = await this.buyerRepository.createBuyer({
       username,
@@ -36,9 +36,9 @@ export class BuyerService {
     });
 
     return {
-      statusCode: 200,
+      statusCode: 201,
       response: buyer,
-      message: 'Buyer profile details',
+      message: 'Buyer created successfully',
     };
   }
 
@@ -46,13 +46,13 @@ export class BuyerService {
     const buyer = await this.buyerRepository.getBuyerByEmail(email);
 
     if (!buyer) {
-      throw new NotFoundException('buyer not found');
+      throw new NotFoundException(CommonErrors.BuyerNotFound);
     }
 
     return {
       statusCode: 200,
       response: buyer,
-      message: 'Buyer profile details',
+      message: 'Buyer profile retrieved successfully',
     };
   }
 
@@ -60,13 +60,13 @@ export class BuyerService {
     const buyer = await this.buyerRepository.getBuyerByUsername(username);
 
     if (!buyer) {
-      throw new NotFoundException('buyer not found');
+      throw new NotFoundException(CommonErrors.BuyerNotFound);
     }
 
     return {
       statusCode: 200,
       response: buyer,
-      message: 'Buyer profile details',
+      message: 'Buyer profile retrieved successfully',
     };
   }
 
@@ -75,6 +75,12 @@ export class BuyerService {
     purchasedGigId,
     type,
   }: BuyerPurchasedGigUpdateDto) {
+    const buyerExists = await this.buyerRepository.getBuyerById(buyerId);
+
+    if (!buyerExists) {
+      throw new NotFoundException(CommonErrors.BuyerNotFound);
+    }
+
     const buyerPurchases =
       await this.buyerRepository.updateBuyerPurchasedGigsProp(
         buyerId,
@@ -85,7 +91,7 @@ export class BuyerService {
     return {
       statusCode: 200,
       response: buyerPurchases,
-      message: 'Buyer profile details',
+      message: 'Buyer purchases updated successfully',
     };
   }
 }

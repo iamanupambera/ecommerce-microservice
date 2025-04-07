@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { GatewayJwtService } from 'src/modules/gatewayJwt/gatewayJwt.service';
+import { CommonErrors } from '@repo/modules/index';
 
 @Injectable()
 export class GatewayJwtGuard implements CanActivate {
@@ -15,13 +16,19 @@ export class GatewayJwtGuard implements CanActivate {
 
     const token = request?.serviceToken;
     if (!token) {
-      throw new UnauthorizedException('Missing service token');
+      throw new UnauthorizedException(CommonErrors.MissingServiceToken);
     }
 
-    if (!(await this.gatewayJwtService.verifyToken(token))) {
-      throw new UnauthorizedException('Invalid or expired service token');
+    try {
+      const isValid = await this.gatewayJwtService.verifyToken(token);
+      if (!isValid) {
+        throw new UnauthorizedException(CommonErrors.InvalidServiceToken);
+      }
+      return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      // Handle specific JWT verification errors if needed
+      throw new UnauthorizedException(CommonErrors.InvalidServiceToken);
     }
-
-    return true;
   }
 }

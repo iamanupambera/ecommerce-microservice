@@ -1,5 +1,12 @@
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   AuthVerifyEmailDto,
   ChangePasswordDTO,
@@ -49,7 +56,7 @@ export class AuthService {
       (await this.authRepository.findByUsername(username)) ||
       (await this.authRepository.findByEmail(email))
     ) {
-      throw new BadRequestException(CommonErrors.UserAlreadyExists);
+      throw new ConflictException(CommonErrors.EmailOrUserNameAlreadyExist);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
@@ -176,7 +183,7 @@ export class AuthService {
     const user = await this.authRepository.getUserWithPassword(identifier);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     const validPassword = await this.authRepository.isValidatePassword(
@@ -185,7 +192,7 @@ export class AuthService {
     );
 
     if (!validPassword) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new UnauthorizedException(CommonErrors.InvalidCredential);
     }
 
     delete user.authPassword;
@@ -278,7 +285,7 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');
@@ -340,16 +347,16 @@ export class AuthService {
     email,
   }: PasswordDTO) {
     if (password !== confirmPassword) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new BadRequestException(CommonErrors.PasswordsNotMatch);
     }
 
     const user = await this.authRepository.findByEmail(email);
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     if (user.resetPasswordRequest?.token !== token) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new UnauthorizedException(CommonErrors.InvalidToken);
     }
 
     await this.authRepository.updatePassword(user.id, password, true);
@@ -401,19 +408,17 @@ export class AuthService {
     const user = await this.authRepository.getUserWithPassword(username);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     if (
       !(await this.authRepository.isValidatePassword(user, currentPassword))
     ) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new UnauthorizedException(CommonErrors.InvalidCredential);
     }
 
     if (await this.authRepository.isValidatePassword(user, newPassword)) {
-      throw new BadRequestException(
-        'current password and new password is same',
-      );
+      throw new BadRequestException(CommonErrors.SamePassword);
     }
 
     await this.authRepository.updatePassword(user.id, newPassword);
@@ -462,11 +467,11 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     if (user?.authOtp?.otp !== otp) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new UnauthorizedException(CommonErrors.InvalidOtp);
     }
 
     await this.authRepository.updateUserById(user.id, {
@@ -518,11 +523,11 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     if (user.verifiedEmail?.emailVerificationToken !== token) {
-      throw new BadRequestException(CommonErrors.InvalidCredential);
+      throw new UnauthorizedException(CommonErrors.InvalidToken);
     }
 
     await this.authRepository.updateVerifyEmailField(user.id, true, {
@@ -613,11 +618,11 @@ export class AuthService {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(CommonErrors.UserNotFound);
+      throw new NotFoundException(CommonErrors.UserNotFound);
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException('Email already verified');
+      throw new ConflictException(CommonErrors.EmailAlreadyVerified);
     }
 
     const randomCharacters = crypto.randomBytes(20).toString('hex');

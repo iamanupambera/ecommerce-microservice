@@ -1,20 +1,28 @@
 export const CommonErrors = {
-  EmailExist: {
-    statusCode: 409,
-    error: 'Conflict Error',
-    message: 'Email already exists',
+  // 400 errors
+  InvalidOtp: {
+    statusCode: 400,
+    error: 'Bad Request Error',
+    message: 'Invalid OTP',
   },
 
-  RoleExit: {
-    statusCode: 409,
-    error: 'Conflict Error',
-    message: 'Role already exists',
+  PasswordsNotMatch: {
+    statusCode: 400,
+    error: 'Bad Request Error',
+    message: 'Passwords do not match',
   },
 
-  NotFound: {
-    statusCode: 404,
-    error: 'NotFound Error',
-    message: 'not exists',
+  SamePassword: {
+    statusCode: 400,
+    error: 'Bad Request Error',
+    message: 'New password cannot be the same as the current password',
+  },
+
+  // 401 errors
+  InvalidToken: {
+    statusCode: 401,
+    error: 'Unauthorized Error',
+    message: 'Invalid token',
   },
 
   Unauthorized: {
@@ -23,45 +31,72 @@ export const CommonErrors = {
     message: 'Invalid credentials',
   },
 
-  UserNotFound: {
-    statusCode: 404,
-    error: 'NotFound Error',
-    message: 'User not exists',
-  },
-
-  RoleNotFound: {
-    statusCode: 404,
-    error: 'NotFound Error',
-    message: 'Role not exists',
-  },
-
-  ServerError: {
-    statusCode: 500,
-    error: 'Server Error',
-    message: 'Server Error',
-  },
-
-  DeviceNotMatched: {
-    statusCode: 401,
-    error: 'Unauthorized Error',
-    message: 'Invalid device type',
-  },
-
-  UserAlreadyExists: {
-    statusCode: 409,
-    error: 'Conflicted Error',
-    message: 'User Already Exists',
-  },
-
   InvalidCredential: {
     statusCode: 401,
     error: 'Unauthorized Error',
-    message: 'username email and password is wrong',
+    message: 'Username, email, or password is incorrect',
   },
 
   UserSessionExpire: {
     statusCode: 401,
     error: 'Unauthorized Error',
-    message: 'login session expire',
+    message: 'Login session has expired',
+  },
+
+  MissingServiceToken: {
+    statusCode: 401,
+    error: 'Unauthorized Error',
+    message: 'Service token is required',
+  },
+
+  InvalidServiceToken: {
+    statusCode: 401,
+    error: 'Unauthorized Error',
+    message: 'Invalid or expired service token',
+  },
+
+  // 404 errors
+  UserNotFound: {
+    statusCode: 404,
+    error: 'Not Found Error',
+    message: 'User does not exist',
+  },
+
+  BuyerNotFound: {
+    statusCode: 404,
+    error: 'Not Found Error',
+    message: 'Buyer details does not exist',
+  },
+
+  SellerNotFound: {
+    statusCode: 404,
+    error: 'Not Found Error',
+    message: 'Seller not found',
+  },
+
+  // 409 errors
+  EmailOrUserNameAlreadyExist: {
+    statusCode: 409,
+    error: 'Conflict Error',
+    message: 'Email or username already exists',
+  },
+
+  EmailAlreadyVerified: {
+    statusCode: 409,
+    error: 'Conflict Error',
+    message: 'Email is already verified',
+  },
+
+  SellerAlreadyExists: {
+    statusCode: 409,
+    error: 'Conflict Error',
+    message: 'Seller already exists',
+  },
+
+  // 500 errors
+  ServerError: {
+    statusCode: 500,
+    error: 'Server Error',
+    message: 'An unexpected error occurred on the server',
   },
 };
