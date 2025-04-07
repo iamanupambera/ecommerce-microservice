@@ -9,16 +9,18 @@ This is a microservices-based backend architecture built using **NestJS** and ma
 This project follows a monorepo structure using **TurboRepo**, with the following services located under the `apps` directory and shared packages under `packages`:
 
 ```
-apps/
-  ├── gateway # API Gateway
-  ├── auth # Authentication Service
-  ├── notification # Notification Service
-  └── user # User Service
-
-packages/
-  ├── emails # Email templating
-  ├── modules # Reusable NestJS modules
-  └── validator # class-validator based request validation
+.
+├── apps/
+│   ├── auth/                 # Authentication Service
+│   ├── gateway/              # API Gateway
+│   ├── notification/         # Notification Service
+│   └── user/                 # User Service
+├── packages/
+│   ├── emails/               # Email templating
+│   ├── modules/              # Reusable NestJS modules
+│   └── validator/            # class-validator based request validation
+├── package.json              # Root-level package.json
+└── turbo.json                # Turborepo config
 ```
 
 ---
