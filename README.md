@@ -1,84 +1,100 @@
-# Turborepo starter
+# NestJS Microservices Monorepo with TurboRepo
 
-This Turborepo starter is maintained by the Turborepo core team.
+This is a microservices-based backend architecture built using **NestJS** and managed via **TurboRepo**. The project is structured to enable modular, scalable development with clear separation of concerns.
 
-## Using this example
+---
 
-Run the following command:
+## 🧱 Monorepo Structure
 
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+This project follows a monorepo structure using **TurboRepo**, with the following services located under the `apps` directory and shared packages under `packages`:
 
 ```
-cd my-turborepo
-pnpm build
+apps/
+  ├── gateway # API Gateway
+  ├── auth # Authentication Service
+  ├── notification # Notification Service
+  └── user # User Service
+
+packages/
+  ├── emails # Email templating
+  ├── modules # Reusable NestJS modules
+  └── validator # class-validator based request validation
 ```
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+## ⚙️ Technologies Used
 
+- **NestJS** – Progressive Node.js framework for building efficient and scalable server-side applications.
+- **TurboRepo** – High-performance monorepo build system.
+- **RabbitMQ (RMQ)** – For asynchronous communication between services.
+- **TCP (RPC)** – For synchronous communication between the Gateway and microservices.
+- **TypeScript** – Strongly typed JavaScript.
+
+---
+
+## 🧩 Microservices Overview
+
+### 1. **Auth Service**
+
+Handles user authentication, login, signup, and JWT/token management.
+
+### 2. **User Service**
+
+Manages user profile data, roles, and user-related operations.
+
+### 3. **Notification Service**
+
+Sends notifications via email/SMS and listens for relevant events using RabbitMQ.
+
+### 4. **Gateway**
+
+Acts as the entry point for all client requests. Communicates with internal services via TCP and dispatches/receives events via RMQ.
+
+---
+
+## 🔁 Communication Strategy
+
+- **TCP (RPC)**:  
+  The Gateway uses TCP transport to perform Remote Procedure Calls (RPC) to each microservice. This enables real-time, synchronous communication.
+
+- **RabbitMQ (RMQ)**:  
+  Used for asynchronous communication and event-driven workflows.
+
+  #### Example Use Cases:
+
+  - `auth` service emits a `user_created` event → `notification` service listens and sends a welcome email.
+  - `user` service emits updates → other services can act on changes (e.g., audit logs, analytics).
+
+## ⚙️ Environment Setup & Running in Dev Mode
+
+### 1. Clone the Repository
+
+```bash
+ git clone https://github.com/iamanupambera/ecommerce-microservice
 ```
-cd my-turborepo
-pnpm dev
+
+### 2. Install Dependencies
+
+```bash
+  npm run dev
 ```
 
-### Remote Caching
+### 3. Set Up Environment Variables
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+```bash
+cp .env.example .env
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 4. Start RabbitMQ (Locally via Docker)
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
+```bash
+  cd ./infra
+  docker compose up
 ```
-npx turbo link
+
+### 5. Run All Services in Development Mode
+
+```bash
+npm run dev
 ```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
