@@ -2,7 +2,14 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { SellerService } from './seller.service';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
-import { SellerDto } from '@repo/validator/index';
+import {
+  ApproveOrderDto,
+  CancelOrderDto,
+  CreateOrderDto,
+  GetReviewFromBuyerDto,
+  SellerDto,
+  UpdateGigsCountDto,
+} from '@repo/validator/index';
 import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'seller';
 
@@ -25,12 +32,12 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'findOneById' })
-  findOneById(@Payload('payload') payload: any) {
+  findOneById(@Payload('payload') payload: { id: string }) {
     return this.sellerService.findOneById(payload.id);
   }
 
   @MessagePattern({ controller, cmd: 'findOneByUsername' })
-  findOneByUsername(@Payload('payload') payload: any) {
+  findOneByUsername(@Payload('payload') payload: { username: string }) {
     return this.sellerService.findOneByUsername(payload.username);
   }
 
@@ -40,27 +47,27 @@ export class SellerController {
   }
 
   @MessagePattern({ controller, cmd: 'createOrder' })
-  createOrder(@Payload('payload') updateSellerDto: any) {
-    return this.sellerService.createOrder(updateSellerDto);
+  createOrder(@Payload('payload') payload: CreateOrderDto) {
+    return this.sellerService.createOrder(payload);
   }
 
   @MessagePattern({ controller, cmd: 'approveOrder' })
-  approveOrder(@Payload('payload') updateSellerDto: any) {
-    return this.sellerService.approveOrder(updateSellerDto);
+  approveOrder(@Payload('payload') payload: ApproveOrderDto) {
+    return this.sellerService.approveOrder(payload);
   }
 
   @MessagePattern({ controller, cmd: 'cancelOrder' })
-  cancelOrder(@Payload('payload') updateSellerDto: any) {
-    return this.sellerService.cancelOrder(updateSellerDto);
+  cancelOrder(@Payload('payload') payload: CancelOrderDto) {
+    return this.sellerService.cancelOrder(payload);
   }
 
   @MessagePattern({ controller, cmd: 'updateGigsCount' })
-  updateGigsCount(@Payload('payload') updateSellerDto: any) {
-    return this.sellerService.updateGigsCount(updateSellerDto);
+  updateGigsCount(@Payload('payload') payload: UpdateGigsCountDto) {
+    return this.sellerService.updateGigsCount(payload);
   }
 
   @EventPattern({ controller, cmd: 'getReviewFromBuyer' })
-  getReviewFromBuyer(@Payload('payload') updateSellerDto: any) {
-    return this.sellerService.getReviewFromBuyer(updateSellerDto);
+  getReviewFromBuyer(@Payload('payload') payload: GetReviewFromBuyerDto) {
+    return this.sellerService.getReviewFromBuyer(payload);
   }
 }

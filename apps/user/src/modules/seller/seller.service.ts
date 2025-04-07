@@ -4,7 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { SellerRepository } from './seller.repository';
-import { SellerDto } from '@repo/validator/index';
+import {
+  ApproveOrderDto,
+  CancelOrderDto,
+  CreateOrderDto,
+  GetReviewFromBuyerDto,
+  SellerDto,
+  UpdateGigsCountDto,
+} from '@repo/validator/index';
 import { AuthJwtPayload } from '@repo/modules/index';
 
 @Injectable()
@@ -103,7 +110,7 @@ export class SellerService {
     };
   }
 
-  async createOrder({ sellerId, ongoingJobs }) {
+  async createOrder({ sellerId, ongoingJobs }: CreateOrderDto) {
     const newOrder = await this.sellerRepository.updateSellerOngoingJobsCount(
       sellerId,
       ongoingJobs,
@@ -122,7 +129,7 @@ export class SellerService {
     completedJobs,
     totalEarnings,
     recentDelivery,
-  }) {
+  }: ApproveOrderDto) {
     const updateOrder =
       await this.sellerRepository.updateSellerCompletedJobsProp({
         sellerId,
@@ -139,9 +146,9 @@ export class SellerService {
     };
   }
 
-  async updateGigsCount({ gigSellerId, count }) {
+  async updateGigsCount({ gigSellerId, count }: UpdateGigsCountDto) {
     const updateCount = await this.sellerRepository.updateTotalGigsCount(
-      `${gigSellerId}`,
+      gigSellerId,
       count,
     );
 
@@ -152,7 +159,7 @@ export class SellerService {
     };
   }
 
-  async cancelOrder({ sellerId }) {
+  async cancelOrder({ sellerId }: CancelOrderDto) {
     const cancelOrder =
       await this.sellerRepository.updateSellerCancelledJobs(sellerId);
 
@@ -163,7 +170,7 @@ export class SellerService {
     };
   }
 
-  async getReviewFromBuyer({ rating, sellerId }) {
+  async getReviewFromBuyer({ rating, sellerId }: GetReviewFromBuyerDto) {
     const newRating = await this.sellerRepository.updateSellerReview({
       rating,
       sellerId,
