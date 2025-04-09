@@ -12,6 +12,7 @@ describe('SearchController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot({}),
         ElasticsearchModule.registerAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
@@ -19,7 +20,6 @@ describe('SearchController', () => {
             node: configService.getOrThrow('ELASTIC_SEARCH_URL'),
           }),
         }),
-        ConfigModule.forRoot({}),
         GatewayJwtModule,
       ],
       controllers: [SearchController],

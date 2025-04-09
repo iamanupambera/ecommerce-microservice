@@ -5,6 +5,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { GatewayJwtModule } from '../gatewayJwt/gatewayJwt.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { LoggerModule, RedisModule } from '@repo/modules/index';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -12,7 +14,16 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({}),
+        ConfigModule.forRoot({ isGlobal: true }),
+        LoggerModule.registerAsync({
+          imports: [ConfigModule],
+          injects: [ConfigService],
+          useFactory: (configService: ConfigService) => ({
+            connectionUrl: configService.getOrThrow('ELASTIC_SEARCH_URL'),
+            name: 'auth service',
+            level: 'debug',
+          }),
+        }),
         JwtModule.registerAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
@@ -56,7 +67,9 @@ describe('AuthService', () => {
             }),
           },
         ]),
+        PrismaModule,
         GatewayJwtModule,
+        RedisModule,
       ],
       providers: [AuthService, AuthRepository],
     }).compile();
