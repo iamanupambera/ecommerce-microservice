@@ -10,7 +10,7 @@ import {
   RegisterDto,
   VerifyOtpDto,
 } from '@repo/validator/index';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'auth_controller';
 

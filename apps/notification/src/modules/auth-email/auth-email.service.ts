@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MailService } from 'src/modules/email/mail.service';
+import { MailService } from '../../modules/email/mail.service';
 import {
   VerifyEmailDto,
   OtpEmailDto,

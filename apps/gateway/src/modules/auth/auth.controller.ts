@@ -12,10 +12,10 @@ import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { AuthGuard } from '@nestjs/passport';
-import { Cookies } from 'src/shared/decorators/cookies.decorator';
-import { AuthUser } from 'src/shared/decorators/auth-user.decorator';
+import { Cookies } from '../../shared/decorators/cookies.decorator';
+import { AuthUser } from '../../shared/decorators/auth-user.decorator';
 import { AuthJwtPayload } from '@repo/modules/index';
-import { BearerToken } from 'src/shared/decorators/bearer-token.decorator';
+import { BearerToken } from '../../shared/decorators/bearer-token.decorator';
 
 @Controller('auth')
 export class AuthController {

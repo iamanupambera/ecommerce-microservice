@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrderEmailService } from './order-email.service';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 
 @Controller()
 @UseGuards(GatewayJwtGuard)

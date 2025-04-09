@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SearchService } from './search.service';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 import { GigsSearchDto } from '@repo/validator/index';
 const controller = 'search';
 

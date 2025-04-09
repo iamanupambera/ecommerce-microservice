@@ -22,6 +22,11 @@
       "cache": false,
       "inputs": ["packages/rabbitmq-setup/src/**", ".env*"],
       "persistent": false
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": []
     }
   }
 }

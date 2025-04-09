@@ -7,7 +7,7 @@ import {
   ForgotPasswordDto,
   PasswordChangeDto,
 } from '@repo/validator/index';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 
 const controller = 'auth_email_controller';
 

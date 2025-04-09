@@ -2,7 +2,7 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BuyerService } from './buyer.service';
 import { AuthJwtPayload } from '@repo/modules/index';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 import {
   BuyerPurchasedGigUpdateDto,
   CreateBuyerDto,

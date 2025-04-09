@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { LoggerService } from '@repo/modules/index';
-import { softDeleteMiddleware } from 'src/shared/softDeleteMiddleware';
+import { softDeleteMiddleware } from '../../shared/softDeleteMiddleware';
 
 @Injectable()
 export class PrismaReadService implements OnModuleInit, OnModuleDestroy {

@@ -6,7 +6,6 @@ import { Module, Global } from '@nestjs/common';
 @Global()
 @Module({
   imports: [
-    ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

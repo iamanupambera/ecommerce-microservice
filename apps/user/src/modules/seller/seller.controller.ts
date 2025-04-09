@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { SellerService } from './seller.service';
-import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
 import {
   ApproveOrderDto,
   CancelOrderDto,

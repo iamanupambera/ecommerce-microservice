@@ -1,6 +1,6 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { BuyerService } from './buyer.service';
-import { AuthUser } from 'src/shared/decorators/auth-user.decorator';
+import { AuthUser } from '../../shared/decorators/auth-user.decorator';
 import { AuthJwtPayload } from '@repo/modules/index';
 import { AuthGuard } from '@nestjs/passport';
 

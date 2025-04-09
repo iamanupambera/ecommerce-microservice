@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { SellerService } from './seller.service';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthUser } from 'src/shared/decorators/auth-user.decorator';
+import { AuthUser } from '../../shared/decorators/auth-user.decorator';
 import { AuthJwtPayload } from '@repo/modules/index';
 
 @UseGuards(AuthGuard('jwt'))

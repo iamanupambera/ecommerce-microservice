@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { GatewayJwtService } from 'src/modules/gatewayJwt/gatewayJwt.service';
+import { GatewayJwtService } from '../modules/gatewayJwt/gatewayJwt.service';
 import { CommonErrors } from '@repo/modules/index';
 
 @Injectable()

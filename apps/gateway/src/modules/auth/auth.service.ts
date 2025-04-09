@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { AuthJwtPayload } from '@repo/modules/index';
 import { Response } from 'express';
 import { catchError, map } from 'rxjs';
-import { GatewayJwtService } from 'src/modules/gatewayJwt/gatewayJwt.service';
+import { GatewayJwtService } from '../../modules/gatewayJwt/gatewayJwt.service';
 const controller = 'auth_controller';
 
 @Injectable()
