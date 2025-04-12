@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
+}
+
+model Gig {
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  sellerId         String            @db.ObjectId
+  username         String
+  profilePicture   String
+  email            String
+  title            String
+  description      String
+  basicTitle       String
+  basicDescription String
+  categories       String
+  subCategories    String[]
+  tags             String[]
+  active           Boolean           @default(true)
+  expectedDelivery String            @default("")
+  ratingsCount     Int               @default(0)
+  ratingSum        Int               @default(0)
+  ratingCategories RatingCategories?
+  price            Float             @default(0)
+  sortId           Int?
+  coverImage       String
+  createdAt        DateTime          @default(now()) @map("createdAt")
+}
+
+model RatingCategories {
+  id       String        @id @default(auto()) @map("_id") @db.ObjectId
+  gig      Gig           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId String        @unique @db.ObjectId
+  five     RatingDetails @relation("FiveRating", fields: [fiveId], references: [id], onDelete: Cascade)
+  fiveId   String        @unique @db.ObjectId
+  four     RatingDetails @relation("FourRating", fields: [fourId], references: [id], onDelete: Cascade)
+  fourId   String        @unique @db.ObjectId
+  three    RatingDetails @relation("ThreeRating", fields: [threeId], references: [id], onDelete: Cascade)
+  threeId  String        @unique @db.ObjectId
+  two      RatingDetails @relation("TwoRating", fields: [twoId], references: [id], onDelete: Cascade)
+  twoId    String        @unique @db.ObjectId
+  one      RatingDetails @relation("OneRating", fields: [oneId], references: [id], onDelete: Cascade)
+  oneId    String        @unique @db.ObjectId
+
+  @@map("rating_categories")
+}
+
+model RatingDetails {
+  id    String            @id @default(auto()) @map("_id") @db.ObjectId
+  value Int               @default(0)
+  count Int               @default(0)
+  five  RatingCategories? @relation("FiveRating")
+  four  RatingCategories? @relation("FourRating")
+  three RatingCategories? @relation("ThreeRating")
+  two   RatingCategories? @relation("TwoRating")
+  one   RatingCategories? @relation("OneRating")
+
+  @@map("rating_details")
+}

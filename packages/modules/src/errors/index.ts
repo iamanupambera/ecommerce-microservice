@@ -74,6 +74,12 @@ export const CommonErrors = {
     message: 'Seller not found',
   },
 
+  GigNotFound: {
+    statusCode: 404,
+    error: 'Not Found Error',
+    message: 'Gig does not exist',
+  },
+
   // 409 errors
   EmailOrUserNameAlreadyExist: {
     statusCode: 409,

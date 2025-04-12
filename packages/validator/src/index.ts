@@ -27,3 +27,5 @@ export {
 } from './user';
 
 export { GigsSearchDto } from './search';
+
+export { CreateGigDto, UpdateGigDto } from './gig';
