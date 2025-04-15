@@ -19,49 +19,8 @@ export class GigRepository {
     private readonly dbWrite: PrismaWriteService,
   ) {}
 
-  async createGig(data: Prisma.GigCreateInput) {
-    const createdGig = await this.dbWrite.prisma.gig.create({ data });
-    if (!createdGig) {
-      throw new InternalServerErrorException(CommonErrors.GigNotFound);
-    }
-
-    // await publishDirectMessage(
-    //   'gigChannel',
-    //   'jobber-seller-update',
-    //   'user-seller',
-    //   JSON.stringify({
-    //     type: 'update-gig-count',
-    //     gigSellerId: `${createdGig.sellerId}`,
-    //     count: 1,
-    //   }),
-    //   'Details sent to users service.',
-    // );
-
-    // await addDataToIndex('gigs', `${createdGig._id}`, data);
-    return createdGig;
-  }
-
-  async deleteGig(gigId: string, sellerId: string) {
-    await this.dbWrite.prisma.gig.delete({ where: { id: gigId } });
-    const data = {
-      type: 'update-gig-count',
-      gigSellerId: sellerId,
-      count: -1,
-    };
-    console.log(data);
-
-    // await publishDirectMessage(
-    //   'gigChannel',
-    //   'jobber-seller-update',
-    //   'user-seller',
-    //   JSON.stringify({
-    //     type: 'update-gig-count',
-    //     gigSellerId: sellerId,
-    //     count: -1,
-    //   }),
-    //   'Details sent to users service.',
-    // );
-    // await deleteIndexedData('gigs', `${gigId}`);
+  createGig(data: Prisma.GigCreateInput) {
+    return this.dbWrite.prisma.gig.create({ data });
   }
 
   async updateGig(
@@ -116,5 +75,9 @@ export class GigRepository {
     }
 
     // await updateIndexedData('gigs', `${gig._id}`, data);
+  }
+
+  async deleteGig(gigId: string) {
+    await this.dbWrite.prisma.gig.delete({ where: { id: gigId } });
   }
 }
