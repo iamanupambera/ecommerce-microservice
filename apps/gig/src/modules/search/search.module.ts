@@ -1,5 +1,8 @@
 import { Module, DynamicModule } from '@nestjs/common';
-import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import {
+  ElasticsearchModule,
+  ElasticsearchService,
+} from '@nestjs/elasticsearch';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SearchService } from './search.service';
 
@@ -22,7 +25,7 @@ export class SearchModule {
           provide: SearchService,
           useFactory: (elasticsearchService) =>
             new SearchService(elasticsearchService, index),
-          inject: [ElasticsearchModule],
+          inject: [ElasticsearchService],
         },
       ],
       exports: [SearchService],

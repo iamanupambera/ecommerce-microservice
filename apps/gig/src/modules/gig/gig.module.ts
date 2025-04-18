@@ -4,9 +4,10 @@ import { GigController } from './gig.controller';
 import { GigRepository } from './gig.repository';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SearchModule } from '../search/search.module';
+import { GatewayJwtModule } from '../gatewayJwt/gatewayJwt.module';
 
 @Module({
-  imports: [PrismaModule, SearchModule.register('gig')],
+  imports: [PrismaModule, SearchModule.register('gig'), GatewayJwtModule],
   controllers: [GigController],
   providers: [GigService, GigRepository],
 })
