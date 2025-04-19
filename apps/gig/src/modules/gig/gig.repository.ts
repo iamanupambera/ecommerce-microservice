@@ -1,8 +1,7 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaReadService } from '../prisma/prisma-read.service';
 import { PrismaWriteService } from '../prisma/prisma-write.service';
 import { Prisma } from '@prisma/client';
-import { CommonErrors } from '@repo/modules/index';
 
 const ratingTypes = {
   '1': 'one',
@@ -20,39 +19,42 @@ export class GigRepository {
   ) {}
 
   createGig(data: Prisma.GigCreateInput) {
-    return this.dbWrite.prisma.gig.create({ data });
+    return this.dbWrite.prisma.gig.create({
+      data: {
+        ...data,
+        ratingCategories: {
+          create: {
+            one: { create: {} },
+            two: { create: {} },
+            three: { create: {} },
+            four: { create: {} },
+            five: { create: {} },
+          },
+        },
+      },
+    });
   }
 
   async updateGig(
     gigId: string,
     gigData: Omit<Prisma.GigUpdateInput, 'gigActive'>,
   ) {
-    const document = await this.dbWrite.prisma.gig.update({
+    return this.dbWrite.prisma.gig.update({
       where: { id: gigId },
       data: gigData,
     });
-
-    if (!document) {
-      throw new InternalServerErrorException(CommonErrors.GigNotFound);
-    }
     // await updateIndexedData('gigs', `${document._id}`, data);
-    return document;
   }
 
   async updateActiveGigProp(gigId: string, gigActive: boolean) {
-    const document = await this.dbWrite.prisma.gig.update({
+    return this.dbWrite.prisma.gig.update({
       where: { id: gigId },
       data: {
         active: gigActive,
       },
     });
 
-    if (!document) {
-      throw new InternalServerErrorException(CommonErrors.GigNotFound);
-    }
-
     // await updateIndexedData('gigs', `${document._id}`, data);
-    return document;
   }
 
   async updateGigReview(data: {
@@ -60,19 +62,27 @@ export class GigRepository {
     rating: keyof typeof ratingTypes;
   }) {
     const ratingKey = ratingTypes[data.rating];
-    const gig = await this.dbWrite.prisma.gig.update({
+    return this.dbWrite.prisma.gig.update({
       where: { id: data.gigId },
       data: {
         ratingsCount: { increment: 1 },
         ratingSum: { increment: +data.rating },
-        [`ratingCategories.${ratingKey}.value`]: { increment: data.rating },
-        [`ratingCategories.${ratingKey}.count`]: { increment: 1 },
+        ratingCategories: {
+          update: {
+            data: {
+              [ratingKey]: {
+                update: {
+                  value: { increment: 1 },
+                  count: {
+                    increment: +data.rating,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
-
-    if (!gig) {
-      throw new InternalServerErrorException(CommonErrors.GigNotFound);
-    }
 
     // await updateIndexedData('gigs', `${gig._id}`, data);
   }

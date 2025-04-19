@@ -26,6 +26,4 @@ export {
   UpdateGigsCountDto,
 } from './user';
 
-export { GigsSearchDto } from './search';
-
 export { CreateGigDto, UpdateGigDto, SearchGigDto } from './gig';
