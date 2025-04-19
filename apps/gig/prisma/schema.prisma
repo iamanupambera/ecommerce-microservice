@@ -33,19 +33,19 @@ model Gig {
 }
 
 model RatingCategories {
-  id       String        @id @default(auto()) @map("_id") @db.ObjectId
-  gig      Gig           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  sellerId String        @unique @db.ObjectId
-  five     RatingDetails @relation("FiveRating", fields: [fiveRatingId], references: [id], onDelete: Cascade)
-  fiveRatingId   String        @unique @db.ObjectId
-  four     RatingDetails @relation("FourRating", fields: [fourRatingId], references: [id], onDelete: Cascade)
-  fourRatingId   String        @unique @db.ObjectId
-  three    RatingDetails @relation("ThreeRating", fields: [threeRatingId], references: [id], onDelete: Cascade)
-  threeRatingId  String        @unique @db.ObjectId
-  two      RatingDetails @relation("TwoRating", fields: [twoRatingId], references: [id], onDelete: Cascade)
-  twoRatingId    String        @unique @db.ObjectId
-  one      RatingDetails @relation("OneRating", fields: [oneRatingId], references: [id], onDelete: Cascade)
-  oneRatingId    String        @unique @db.ObjectId
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  gig           Gig           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId      String        @unique @db.ObjectId
+  five          RatingDetails @relation("FiveRating", fields: [fiveRatingId], references: [id], onDelete: Cascade)
+  fiveRatingId  String        @unique @db.ObjectId
+  four          RatingDetails @relation("FourRating", fields: [fourRatingId], references: [id], onDelete: Cascade)
+  fourRatingId  String        @unique @db.ObjectId
+  three         RatingDetails @relation("ThreeRating", fields: [threeRatingId], references: [id], onDelete: Cascade)
+  threeRatingId String        @unique @db.ObjectId
+  two           RatingDetails @relation("TwoRating", fields: [twoRatingId], references: [id], onDelete: Cascade)
+  twoRatingId   String        @unique @db.ObjectId
+  one           RatingDetails @relation("OneRating", fields: [oneRatingId], references: [id], onDelete: Cascade)
+  oneRatingId   String        @unique @db.ObjectId
 
   @@map("rating_categories")
 }
