@@ -1,7 +1,11 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GigService } from './gig.service';
-import { CreateGigDto, UpdateGigDto } from '@repo/validator/index';
+import {
+  CreateGigDto,
+  SearchGigDto,
+  UpdateGigDto,
+} from '@repo/validator/index';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 import { AuthJwtPayload } from '@repo/modules/index';
 const controller = 'gig';
@@ -20,8 +24,11 @@ export class GigController {
   }
 
   @MessagePattern({ controller, cmd: 'findAll' })
-  findAll() {
-    return this.gigService.findAll();
+  findAll(
+    @Payload('payload')
+    body: SearchGigDto,
+  ) {
+    return this.gigService.findAll(body);
   }
 
   @MessagePattern({ controller, cmd: 'findOne' })

@@ -28,4 +28,4 @@ export {
 
 export { GigsSearchDto } from './search';
 
-export { CreateGigDto, UpdateGigDto } from './gig';
+export { CreateGigDto, UpdateGigDto, SearchGigDto } from './gig';

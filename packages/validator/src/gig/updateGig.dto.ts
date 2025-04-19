@@ -5,11 +5,12 @@ import {
   IsString,
   Length,
   Min,
+  IsMongoId,
 } from 'class-validator';
 
 export class UpdateGigDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   id: string;
 
   @IsNotEmpty()

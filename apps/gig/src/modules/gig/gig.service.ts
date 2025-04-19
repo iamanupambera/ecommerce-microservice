@@ -1,8 +1,9 @@
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
-  SearchResponse,
-  SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/types';
-import { CreateGigDto, UpdateGigDto } from '@repo/validator/index';
+  CreateGigDto,
+  SearchGigDto,
+  UpdateGigDto,
+} from '@repo/validator/index';
 import { AuthJwtPayload, CommonErrors } from '@repo/modules/index';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SearchService } from '../search/search.service';
@@ -38,10 +39,6 @@ export class GigService {
       response: data,
       message: 'Gig created successfully',
     };
-  }
-
-  findAll() {
-    return `This action returns all gig`;
   }
 
   async findOne(id: string) {
@@ -160,23 +157,22 @@ export class GigService {
   }
 
   async gigsSearchBySellerId(searchQuery: string, active: boolean) {
-    const queryList = [
-      {
-        query_string: {
-          fields: ['sellerId'],
-          query: `*${searchQuery}*`,
-        },
-      },
-      {
-        term: {
-          active,
-        },
-      },
-    ];
-    const result: SearchResponse = await this.searchService.searchIndexItem({
+    const result = await this.searchService.searchIndexItem({
       query: {
         bool: {
-          must: [...queryList],
+          must: [
+            {
+              query_string: {
+                fields: ['sellerId'],
+                query: `*${searchQuery}*`,
+              },
+            },
+            {
+              term: {
+                active,
+              },
+            },
+          ],
         },
       },
     });
@@ -187,68 +183,51 @@ export class GigService {
     };
   }
 
-  async gigsSearch(
-    searchQuery: string,
-    paginate: { from: string; size: number; type: string },
-    deliveryTime?: string,
-    min?: number,
-    max?: number,
-  ) {
-    const { from, size, type } = paginate;
-    const queryList: {
-      query_string?: {
-        fields: string[];
-        query: string;
-      };
-      term?: { active: boolean };
-      range?: { price: { gte: number; lte: number } };
-    }[] = [
-      {
-        query_string: {
-          fields: [
-            'username',
-            'title',
-            'description',
-            'basicDescription',
-            'basicTitle',
-            'categories',
-            'subCategories',
-            'tags',
-          ],
-          query: `*${searchQuery}*`,
-        },
-      },
-      {
-        term: {
-          active: true,
-        },
-      },
-    ];
-
-    if (deliveryTime !== 'undefined') {
-      queryList.push({
-        query_string: {
-          fields: ['expectedDelivery'],
-          query: `*${deliveryTime}*`,
-        },
-      });
-    }
-
-    if (!isNaN(parseInt(`${min}`)) && !isNaN(parseInt(`${max}`))) {
-      queryList.push({
-        range: {
-          price: {
-            gte: min,
-            lte: max,
-          },
-        },
-      });
-    }
-    const result: SearchResponse = await this.searchService.searchIndexItem({
+  async findAll(body: SearchGigDto) {
+    const { searchQuery, deliveryTime, max, min, from, size, type } = body;
+    const result = await this.searchService.searchIndexItem({
       size,
       query: {
         bool: {
-          must: [...queryList],
+          must: [
+            {
+              query_string: {
+                fields: [
+                  'username',
+                  'title',
+                  'description',
+                  'basicDescription',
+                  'basicTitle',
+                  'categories',
+                  'subCategories',
+                  'tags',
+                ],
+                query: `*${searchQuery}*`,
+              },
+            },
+            {
+              term: {
+                active: true,
+              },
+            },
+            // if deliveryTime add in filter then add this search
+            deliveryTime && {
+              query_string: {
+                fields: ['expectedDelivery'],
+                query: `*${deliveryTime}*`,
+              },
+            },
+            // if min max add in search then add this filter
+            min &&
+              max && {
+                range: {
+                  price: {
+                    gte: min,
+                    lte: max,
+                  },
+                },
+              },
+          ],
         },
       },
       sort: [
@@ -256,7 +235,7 @@ export class GigService {
           sortId: type === 'forward' ? 'asc' : 'desc',
         },
       ],
-      ...(from !== '0' && { search_after: [from] }),
+      search_after: [from],
     });
     const total = result.hits.total as SearchTotalHits;
     return {

@@ -69,20 +69,15 @@ export class SearchService<TDocument = unknown> implements OnModuleInit {
     return result._source;
   }
 
-  async searchIndexItem({
-    query,
-    size,
-    sort,
-  }: {
+  async searchIndexItem(body: {
     query: QueryDslQueryContainer;
     size?: number;
     sort?: Sort;
+    search_after?: any[];
   }) {
     return this.elasticsearchService.search<TDocument>({
+      ...body,
       index: this.index,
-      size,
-      query,
-      sort,
     });
   }
 }
