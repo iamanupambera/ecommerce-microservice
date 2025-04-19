@@ -4,7 +4,11 @@ import {
   SearchGigDto,
   UpdateGigDto,
 } from '@repo/validator/index';
-import { AuthJwtPayload, CommonErrors } from '@repo/modules/index';
+import {
+  AuthJwtPayload,
+  CommonErrors,
+  RedisService,
+} from '@repo/modules/index';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SearchService } from '../search/search.service';
 import { GigRepository } from './gig.repository';
@@ -15,6 +19,7 @@ export class GigService {
   constructor(
     private readonly gigRepository: GigRepository,
     private readonly searchService: SearchService<Gig>,
+    private readonly redisService: RedisService,
   ) {}
 
   async create(body: CreateGigDto, { email, username }: AuthJwtPayload) {
@@ -339,6 +344,7 @@ export class GigService {
   }
 
   async getUserSelectedGigCategory(key: string) {
-    return key;
+    const response = await this.redisService.redis.get(key);
+    return response;
   }
 }

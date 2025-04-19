@@ -1,4 +1,5 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { LoggerService } from '@repo/modules/index';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
@@ -26,6 +27,9 @@ async function bootstrap() {
 
   // Start the application
   await app.listen(port);
+
+  const logger = app.get(LoggerService);
+  logger.log('info', 'Gateway server running');
 }
 
 function setupSecurityMiddleware(app: NestExpressApplication) {
