@@ -155,9 +155,9 @@ export class GigService {
     const resultHits = result.hits.hits.map((item) => item._source);
 
     return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
       message: 'Search top gigs results',
-      total,
-      gigs: resultHits,
     };
   }
 
@@ -190,9 +190,9 @@ export class GigService {
     const resultHits = result.hits.hits.map((item) => item._source);
 
     return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
       message: 'Search gigs category results',
-      total,
-      gigs: resultHits,
     };
   }
 
@@ -225,9 +225,9 @@ export class GigService {
     const resultHits = result.hits.hits.map((item) => item._source);
 
     return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
       message: 'More gigs like this result',
-      total,
-      gigs: resultHits,
     };
   }
 
@@ -287,8 +287,9 @@ export class GigService {
     });
     const total = result.hits.total as SearchTotalHits;
     return {
-      total: total.value,
-      hits: result.hits.hits,
+      statusCode: 200,
+      response: { total: total.value, hits: result.hits.hits },
+      message: 'gig list',
     };
   }
 
