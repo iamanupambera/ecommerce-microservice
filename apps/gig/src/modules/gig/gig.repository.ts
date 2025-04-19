@@ -43,7 +43,6 @@ export class GigRepository {
       where: { id: gigId },
       data: gigData,
     });
-    // await updateIndexedData('gigs', `${document._id}`, data);
   }
 
   async updateActiveGigProp(gigId: string, gigActive: boolean) {
@@ -53,8 +52,6 @@ export class GigRepository {
         active: gigActive,
       },
     });
-
-    // await updateIndexedData('gigs', `${document._id}`, data);
   }
 
   async updateGigReview(data: {
