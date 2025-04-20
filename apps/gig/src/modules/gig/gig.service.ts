@@ -12,7 +12,7 @@ import {
 } from '@repo/modules/index';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { SearchService } from '../search/search.service';
-import { GigRepository } from './gig.repository';
+import { GigRepository, ratingTypes } from './gig.repository';
 import { Gig } from '@prisma/client';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
@@ -319,6 +319,20 @@ export class GigService {
     return {
       statusCode: 200,
       response: updatedGig,
+      message: 'Gig updated successfully.',
+    };
+  }
+
+  async updateGigReview(body: {
+    gigId: string;
+    rating: keyof typeof ratingTypes;
+  }) {
+    const data = await this.gigRepository.updateGigReview(body);
+    await this.searchService.updateIndexedData(data.id, data);
+
+    return {
+      statusCode: 200,
+      response: {},
       message: 'Gig updated successfully.',
     };
   }

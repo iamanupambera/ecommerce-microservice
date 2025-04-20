@@ -8,6 +8,7 @@ import {
 } from '@repo/validator/index';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
 import { AuthJwtPayload } from '@repo/modules/index';
+import { ratingTypes } from './gig.repository';
 const controller = 'gig';
 
 @Controller()
@@ -64,6 +65,17 @@ export class GigController {
   @MessagePattern({ controller, cmd: 'update' })
   update(@Payload('payload') { id, ...body }: UpdateGigDto) {
     return this.gigService.update(id, body);
+  }
+
+  @MessagePattern({ controller, cmd: 'updateGigReview' })
+  updateGigReview(
+    @Payload('payload')
+    body: {
+      gigId: string;
+      rating: keyof typeof ratingTypes;
+    },
+  ) {
+    return this.gigService.updateGigReview(body);
   }
 
   @MessagePattern({ controller, cmd: 'changeStatus' })

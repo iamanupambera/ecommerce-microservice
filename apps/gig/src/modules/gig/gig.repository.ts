@@ -3,7 +3,7 @@ import { PrismaReadService } from '../prisma/prisma-read.service';
 import { PrismaWriteService } from '../prisma/prisma-write.service';
 import { Prisma } from '@prisma/client';
 
-const ratingTypes = {
+export const ratingTypes = {
   '1': 'one',
   '2': 'two',
   '3': 'three',
@@ -80,8 +80,6 @@ export class GigRepository {
         },
       },
     });
-
-    // await updateIndexedData('gigs', `${gig._id}`, data);
   }
 
   async deleteGig(gigId: string) {
