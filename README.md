@@ -79,7 +79,7 @@ Acts as the entry point for all client requests. Communicates with internal serv
 ### 2. Install Dependencies
 
 ```bash
-  npm run dev
+  npm install
 ```
 
 ### 3. Set Up Environment Variables
@@ -92,7 +92,7 @@ cp .env.example .env
 
 ```bash
   cd ./infra
-  docker compose up
+  docker compose up -d
 ```
 
 ### 5. Run All Services in Development Mode
