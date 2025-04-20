@@ -1,8 +1,8 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class GetReviewFromBuyerDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   sellerId: string;
 
   @IsNotEmpty()

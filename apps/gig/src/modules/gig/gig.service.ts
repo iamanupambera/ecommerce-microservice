@@ -7,12 +7,15 @@ import {
 import {
   AuthJwtPayload,
   CommonErrors,
+  LoggerService,
   RedisService,
 } from '@repo/modules/index';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { SearchService } from '../search/search.service';
 import { GigRepository } from './gig.repository';
 import { Gig } from '@prisma/client';
+import { ClientProxy } from '@nestjs/microservices';
+import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 
 @Injectable()
 export class GigService {
@@ -20,6 +23,10 @@ export class GigService {
     private readonly gigRepository: GigRepository,
     private readonly searchService: SearchService<Gig>,
     private readonly redisService: RedisService,
+    @Inject('USER_SERVICE')
+    private readonly userService: ClientProxy,
+    private readonly logger: LoggerService,
+    private readonly gatewayJwtService: GatewayJwtService,
   ) {}
 
   async create(body: CreateGigDto, { email, username }: AuthJwtPayload) {
@@ -32,16 +39,41 @@ export class GigService {
     });
     await this.searchService.addDataToIndex(createdGig.id, createdGig);
 
-    // update user service
-    const data = {
-      type: 'update-gig-count',
-      gigSellerId: createdGig.sellerId,
-      count: 1,
-    };
+    // update user service gig count
+    this.userService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'seller', cmd: 'updateGigsCount' },
+        {
+          userToken: null,
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          payload: {
+            gigSellerId: createdGig.sellerId,
+            count: 1,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (error) => {
+          this.logger.log(
+            'error',
+            GigService.name + ' service error at auth register',
+            error,
+          );
+        },
+      });
 
     return {
       statusCode: 201,
-      response: data,
+      response: createdGig,
       message: 'Gig created successfully',
     };
   }
@@ -61,7 +93,7 @@ export class GigService {
 
   async update(id: string, body: Omit<UpdateGigDto, 'id'>) {
     const updatedGig = await this.gigRepository.updateGig(id, body);
-    // await updateIndexedData('gigs', `${document._id}`, data);
+    await this.searchService.updateIndexedData(updatedGig.id, updatedGig);
     return {
       statusCode: 200,
       response: updatedGig,
@@ -72,17 +104,42 @@ export class GigService {
   async remove(gigId: string, sellerId: string) {
     await this.gigRepository.deleteGig(gigId);
 
-    // update user service
-    const data = {
-      type: 'update-gig-count',
-      gigSellerId: sellerId,
-      count: -1,
-    };
+    // update user gig count
+    this.userService
+      .send<
+        object,
+        {
+          userToken: string;
+          serviceToken: string;
+          payload: object;
+          user: object;
+        }
+      >(
+        { controller: 'seller', cmd: 'updateGigsCount' },
+        {
+          userToken: null,
+          serviceToken: await this.gatewayJwtService.generateToken('USER'),
+          payload: {
+            gigSellerId: sellerId,
+            count: -1,
+          },
+          user: null,
+        },
+      )
+      .subscribe({
+        error: (error) => {
+          this.logger.log(
+            'error',
+            GigService.name + ' service error at auth register',
+            error,
+          );
+        },
+      });
 
     await this.searchService.deleteIndexedData(gigId);
     return {
       statusCode: 200,
-      response: data,
+      response: {},
       message: 'Gig updated successfully.',
     };
   }
@@ -92,7 +149,7 @@ export class GigService {
       gigId,
       active,
     );
-    // await updateIndexedData('gigs', `${document._id}`, data);
+    await this.searchService.updateIndexedData(updatedGig.id, updatedGig);
 
     return {
       statusCode: 200,

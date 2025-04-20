@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { LoggerModule } from '@repo/modules/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GigModule } from './modules/gig/gig.module';
+import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { GigModule } from './modules/gig/gig.module';
         level: 'debug',
       }),
     }),
+    GatewayJwtModule,
     GigModule,
   ],
   controllers: [AppController],

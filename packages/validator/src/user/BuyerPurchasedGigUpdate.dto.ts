@@ -1,12 +1,12 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class BuyerPurchasedGigUpdateDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   buyerId: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   purchasedGigId: string;
 
   @IsNotEmpty()

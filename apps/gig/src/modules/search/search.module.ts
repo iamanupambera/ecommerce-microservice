@@ -8,7 +8,7 @@ import { SearchService } from './search.service';
 
 @Module({})
 export class SearchModule {
-  static register(index: string): DynamicModule {
+  static register({ index }: { index: string }): DynamicModule {
     return {
       module: SearchModule,
       imports: [

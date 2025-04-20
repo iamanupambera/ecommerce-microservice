@@ -1,8 +1,8 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsMongoId, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class ApproveOrderDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   sellerId: string;
 
   @IsNotEmpty()

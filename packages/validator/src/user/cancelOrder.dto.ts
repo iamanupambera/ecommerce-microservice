@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class CancelOrderDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   sellerId: string;
 }

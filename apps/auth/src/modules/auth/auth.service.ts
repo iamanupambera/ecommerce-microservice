@@ -33,7 +33,7 @@ export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private configService: ConfigService,
-    @Inject('NOTIFICATION_SERVICE')
+    @Inject('USER_SERVICE')
     private readonly userService: ClientProxy,
     @Inject('NOTIFICATION_SERVICE')
     private readonly notificationService: ClientProxy,

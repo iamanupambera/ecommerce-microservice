@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class UpdateGigsCountDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   gigSellerId: string;
 
   @IsNotEmpty()

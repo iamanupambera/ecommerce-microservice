@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -9,7 +10,7 @@ import {
 
 export class CreateGigDto {
   @IsNotEmpty()
-  @IsString()
+  @IsMongoId()
   sellerId: string;
 
   @IsNotEmpty()

@@ -46,11 +46,11 @@ export class SearchService<TDocument = unknown> implements OnModuleInit {
     });
   }
 
-  async updateIndexedData(itemId: string, gigDocument: TDocument) {
+  async updateIndexedData(itemId: string, document: TDocument) {
     await this.elasticsearchService.update({
       index: this.index,
       id: itemId,
-      doc: gigDocument,
+      doc: document,
     });
   }
 
