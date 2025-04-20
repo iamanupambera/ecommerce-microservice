@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { SearchService } from './search.service';
-import { SearchController } from './search.controller';
+import { GigService } from './gig.service';
+import { GigController } from './gig.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -8,20 +8,20 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'AUTH_SERVICE',
+        name: 'GIG_SERVICE',
         imports: [ConfigModule],
         inject: [ConfigService],
         useFactory: async (configService: ConfigService) => ({
           transport: Transport.TCP,
           options: {
             host: '127.0.0.1',
-            port: configService.getOrThrow<number>('AUTH_SERVICE_PORT'),
+            port: configService.getOrThrow<number>('GIG_SERVICE_PORT'),
           },
         }),
       },
     ]),
   ],
-  controllers: [SearchController],
-  providers: [SearchService],
+  controllers: [GigController],
+  providers: [GigService],
 })
-export class SearchModule {}
+export class GigModule {}
