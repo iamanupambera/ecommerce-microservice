@@ -48,47 +48,47 @@ export class GigController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('seller/:sellerId')
-  getSellerGigs(
+  findSellerGigs(
     @Param('sellerId') sellerId: string,
     @AuthUser() user: AuthJwtPayload,
   ) {
-    return this.gigService.getSellerGigs(sellerId, user);
+    return this.gigService.findSellerGigs(sellerId, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('seller/pause/:sellerId')
-  getSellerPausedGigs(
+  findSellerInactiveGigs(
     @Param('sellerId') sellerId: string,
     @AuthUser() user: AuthJwtPayload,
   ) {
-    return this.gigService.getSellerPausedGigs(sellerId, user);
+    return this.gigService.findSellerInactiveGigs(sellerId, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('category/:username')
-  getGigsByCategory(
+  findGigsByCategory(
     @Param('username') username: string,
     @AuthUser() user: AuthJwtPayload,
   ) {
-    return this.gigService.getGigsByCategory(username, user);
+    return this.gigService.findGigsByCategory(username, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('top/:username')
-  getTopRatedGigsByCategory(
+  findTopRatedGigsByCategory(
     @Param('username') username: string,
     @AuthUser() user: AuthJwtPayload,
   ) {
-    return this.gigService.getTopRatedGigsByCategory(username, user);
+    return this.gigService.findTopRatedGigsByCategory(username, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('similar/:gigId')
-  getMoreGigsLikeThis(
+  findMoreGigsLikeThis(
     @Param('gigId') gigId: string,
     @AuthUser() user: AuthJwtPayload,
   ) {
-    return this.gigService.getMoreGigsLikeThis(gigId, user);
+    return this.gigService.findMoreGigsLikeThis(gigId, user);
   }
 
   @Get(':id')
@@ -108,16 +108,21 @@ export class GigController {
 
   @UseGuards(AuthGuard('jwt'))
   @Put('active/:gigId')
-  gigChangeStatus(
+  changeStatus(
     @Param('gigId') gigId: string,
     @AuthUser() user: AuthJwtPayload,
+    @Body() body: object,
   ) {
-    return this.gigService.gigChangeStatus(gigId, user);
+    return this.gigService.changeStatus({ ...body, gigId }, user);
   }
 
-  @Delete(':id')
+  @Delete(':gigId/:sellerId')
   @UseGuards(AuthGuard('jwt'))
-  remove(@Param('id') id: string, @AuthUser() user: AuthJwtPayload) {
-    return this.gigService.remove(id, user);
+  remove(
+    @Param('gigId') gigId: string,
+    @Param('sellerId') sellerId: string,
+    @AuthUser() user: AuthJwtPayload,
+  ) {
+    return this.gigService.remove({ gigId, sellerId }, user);
   }
 }

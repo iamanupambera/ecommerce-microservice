@@ -70,7 +70,7 @@ export class GigService {
       );
   }
 
-  async getSellerGigs(sellerId: string, user: AuthJwtPayload) {
+  async findSellerGigs(sellerId: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -81,7 +81,7 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'getSellerGigs' },
+        { controller, cmd: 'findSellerGigs' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
@@ -99,7 +99,7 @@ export class GigService {
       );
   }
 
-  async getSellerPausedGigs(sellerId: string, user: AuthJwtPayload) {
+  async findSellerInactiveGigs(sellerId: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -110,7 +110,7 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'getSellerPausedGigs' },
+        { controller, cmd: 'findSellerInactiveGigs' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
@@ -128,7 +128,7 @@ export class GigService {
       );
   }
 
-  async getGigsByCategory(username: string, user: AuthJwtPayload) {
+  async findGigsByCategory(username: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -139,7 +139,7 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'getGigsByCategory' },
+        { controller, cmd: 'findGigsByCategory' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
@@ -157,7 +157,7 @@ export class GigService {
       );
   }
 
-  async getTopRatedGigsByCategory(username: string, user: AuthJwtPayload) {
+  async findTopRatedGigsByCategory(username: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -168,7 +168,7 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'getTopRatedGigsByCategory' },
+        { controller, cmd: 'findTopRatedGigsByCategory' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
@@ -186,7 +186,7 @@ export class GigService {
       );
   }
 
-  async getMoreGigsLikeThis(gigId: string, user: AuthJwtPayload) {
+  async findMoreGigsLikeThis(gigId: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -197,7 +197,7 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'getMoreGigsLikeThis' },
+        { controller, cmd: 'findMoreGigsLikeThis' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
@@ -273,7 +273,7 @@ export class GigService {
       );
   }
 
-  async gigChangeStatus(gigId: string, user: AuthJwtPayload) {
+  async changeStatus(payload: object, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -284,11 +284,11 @@ export class GigService {
           user: object;
         }
       >(
-        { controller, cmd: 'gigChangeStatus' },
+        { controller, cmd: 'changeStatus' },
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
-          payload: { gigId },
+          payload,
           user,
         },
       )
@@ -302,7 +302,7 @@ export class GigService {
       );
   }
 
-  async remove(id: string, user: AuthJwtPayload) {
+  async remove(payload: object, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -317,7 +317,7 @@ export class GigService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
-          payload: { id },
+          payload,
           user,
         },
       )

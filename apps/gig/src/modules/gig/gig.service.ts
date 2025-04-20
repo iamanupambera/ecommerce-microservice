@@ -78,6 +78,71 @@ export class GigService {
     };
   }
 
+  async findAll(body: SearchGigDto) {
+    const { searchQuery, deliveryTime, max, min, from, size, type } = body;
+
+    const mustQueries = [
+      {
+        query_string: {
+          fields: [
+            'username',
+            'title',
+            'description',
+            'basicDescription',
+            'basicTitle',
+            'categories',
+            'subCategories',
+            'tags',
+          ],
+          query: `*${searchQuery}*`,
+        },
+      },
+      {
+        term: {
+          active: true,
+        },
+      },
+      // Conditionally add deliveryTime query
+      deliveryTime && {
+        query_string: {
+          fields: ['expectedDelivery'],
+          query: `*${deliveryTime}*`,
+        },
+      },
+      // Conditionally add min and max range query
+      min &&
+        max && {
+          range: {
+            price: {
+              gte: min,
+              lte: max,
+            },
+          },
+        },
+    ].filter(Boolean); // Remove falsy values
+
+    const result = await this.searchService.searchIndexItem({
+      size,
+      query: {
+        bool: {
+          must: mustQueries,
+        },
+      },
+      sort: [
+        {
+          sortId: type === 'forward' ? 'asc' : 'desc',
+        },
+      ],
+      search_after: [from],
+    });
+    const total = result.hits.total as SearchTotalHits;
+    return {
+      statusCode: 200,
+      response: { total: total.value, hits: result.hits.hits },
+      message: 'gig list',
+    };
+  }
+
   async findOne(id: string) {
     const gig = await this.searchService.getIndexItemById(id);
 
@@ -91,9 +156,180 @@ export class GigService {
     };
   }
 
+  async findSellerGigs(sellerId: string) {
+    const result = await this.gigsSearchBySellerId(sellerId, true);
+    const gigs = result.hits.map((item) => item._source);
+
+    return {
+      statusCode: 200,
+      response: gigs,
+      message: 'Seller gigs',
+    };
+  }
+
+  async findSellerInactiveGigs(sellerId: string) {
+    const result = await this.gigsSearchBySellerId(sellerId, false);
+    const gigs = result.hits.map((item) => item._source);
+
+    return { statusCode: 200, response: gigs, message: 'Seller gigs' };
+  }
+
+  async findTopRatedGigsByCategory(username: string) {
+    const category = await this.redisService.redis.get(
+      `selectedCategories:${username}`,
+    );
+
+    const result = await this.searchService.searchIndexItem({
+      size: 10,
+      query: {
+        bool: {
+          filter: {
+            script: {
+              script: {
+                source:
+                  "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value == params['threshold'])",
+                lang: 'painless',
+                params: {
+                  threshold: 5,
+                },
+              },
+            },
+          },
+          must: [
+            {
+              query_string: {
+                fields: ['categories'],
+                query: `*${category}*`,
+              },
+            },
+          ],
+        },
+      },
+    });
+    const total = result.hits.total as SearchTotalHits;
+    const resultHits = result.hits.hits.map((item) => item._source);
+
+    return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
+      message: 'Search top gigs results',
+    };
+  }
+
+  async findGigsByCategory(username: string) {
+    const category = await this.redisService.redis.get(
+      `selectedCategories:${username}`,
+    );
+
+    const result = await this.searchService.searchIndexItem({
+      size: 10,
+      query: {
+        bool: {
+          must: [
+            {
+              query_string: {
+                fields: ['categories'],
+                query: `*${category}*`,
+              },
+            },
+            {
+              term: {
+                active: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+    const total = result.hits.total as SearchTotalHits;
+    const resultHits = result.hits.hits.map((item) => item._source);
+
+    return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
+      message: 'Search gigs category results',
+    };
+  }
+
+  async findMoreGigsLikeThis(gigId: string) {
+    const result = await this.searchService.searchIndexItem({
+      size: 5,
+      query: {
+        more_like_this: {
+          fields: [
+            'username',
+            'title',
+            'description',
+            'basicDescription',
+            'basicTitle',
+            'categories',
+            'subCategories',
+            'tags',
+          ],
+          like: [
+            {
+              _index: 'gigs',
+              _id: gigId,
+            },
+          ],
+        },
+      },
+    });
+    const total = result.hits.total as SearchTotalHits;
+
+    const resultHits = result.hits.hits.map((item) => item._source);
+
+    return {
+      statusCode: 200,
+      response: { total, gigs: resultHits },
+      message: 'More gigs like this result',
+    };
+  }
+
+  private async gigsSearchBySellerId(searchQuery: string, active: boolean) {
+    const result = await this.searchService.searchIndexItem({
+      query: {
+        bool: {
+          must: [
+            {
+              query_string: {
+                fields: ['sellerId'],
+                query: `*${searchQuery}*`,
+              },
+            },
+            {
+              term: {
+                active,
+              },
+            },
+          ],
+        },
+      },
+    });
+    const total = result.hits.total as SearchTotalHits;
+    return {
+      total: total.value,
+      hits: result.hits.hits,
+    };
+  }
+
   async update(id: string, body: Omit<UpdateGigDto, 'id'>) {
     const updatedGig = await this.gigRepository.updateGig(id, body);
     await this.searchService.updateIndexedData(updatedGig.id, updatedGig);
+    return {
+      statusCode: 200,
+      response: updatedGig,
+      message: 'Gig updated successfully.',
+    };
+  }
+
+  async changeStatus(gigId: string, active: boolean) {
+    const updatedGig = await this.gigRepository.updateActiveGigProp(
+      gigId,
+      active,
+    );
+    await this.searchService.updateIndexedData(updatedGig.id, updatedGig);
+
     return {
       statusCode: 200,
       response: updatedGig,
@@ -141,239 +377,6 @@ export class GigService {
       statusCode: 200,
       response: {},
       message: 'Gig updated successfully.',
-    };
-  }
-
-  async gigUpdateActive(gigId: string, active: boolean) {
-    const updatedGig = await this.gigRepository.updateActiveGigProp(
-      gigId,
-      active,
-    );
-    await this.searchService.updateIndexedData(updatedGig.id, updatedGig);
-
-    return {
-      statusCode: 200,
-      response: updatedGig,
-      message: 'Gig updated successfully.',
-    };
-  }
-
-  async sellerGigs(sellerId: string) {
-    const result = await this.gigsSearchBySellerId(sellerId, true);
-    const gigs = result.hits.map((item) => item._source);
-
-    return {
-      statusCode: 200,
-      response: gigs,
-      message: 'Seller gigs',
-    };
-  }
-
-  async sellerInactiveGigs(sellerId: string) {
-    const result = await this.gigsSearchBySellerId(sellerId, false);
-    const gigs = result.hits.map((item) => item._source);
-
-    return { statusCode: 200, response: gigs, message: 'Seller gigs' };
-  }
-
-  async topRatedGigsByCategory(username: string) {
-    const category = await this.redisService.redis.get(
-      `selectedCategories:${username}`,
-    );
-
-    const result = await this.searchService.searchIndexItem({
-      size: 10,
-      query: {
-        bool: {
-          filter: {
-            script: {
-              script: {
-                source:
-                  "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value == params['threshold'])",
-                lang: 'painless',
-                params: {
-                  threshold: 5,
-                },
-              },
-            },
-          },
-          must: [
-            {
-              query_string: {
-                fields: ['categories'],
-                query: `*${category}*`,
-              },
-            },
-          ],
-        },
-      },
-    });
-    const total = result.hits.total as SearchTotalHits;
-    const resultHits = result.hits.hits.map((item) => item._source);
-
-    return {
-      statusCode: 200,
-      response: { total, gigs: resultHits },
-      message: 'Search top gigs results',
-    };
-  }
-
-  async gigsByCategory(username: string) {
-    const category = await this.redisService.redis.get(
-      `selectedCategories:${username}`,
-    );
-
-    const result = await this.searchService.searchIndexItem({
-      size: 10,
-      query: {
-        bool: {
-          must: [
-            {
-              query_string: {
-                fields: ['categories'],
-                query: `*${category}*`,
-              },
-            },
-            {
-              term: {
-                active: true,
-              },
-            },
-          ],
-        },
-      },
-    });
-    const total = result.hits.total as SearchTotalHits;
-    const resultHits = result.hits.hits.map((item) => item._source);
-
-    return {
-      statusCode: 200,
-      response: { total, gigs: resultHits },
-      message: 'Search gigs category results',
-    };
-  }
-
-  async moreLikeThis(gigId: string) {
-    const result = await this.searchService.searchIndexItem({
-      size: 5,
-      query: {
-        more_like_this: {
-          fields: [
-            'username',
-            'title',
-            'description',
-            'basicDescription',
-            'basicTitle',
-            'categories',
-            'subCategories',
-            'tags',
-          ],
-          like: [
-            {
-              _index: 'gigs',
-              _id: gigId,
-            },
-          ],
-        },
-      },
-    });
-    const total = result.hits.total as SearchTotalHits;
-
-    const resultHits = result.hits.hits.map((item) => item._source);
-
-    return {
-      statusCode: 200,
-      response: { total, gigs: resultHits },
-      message: 'More gigs like this result',
-    };
-  }
-
-  async findAll(body: SearchGigDto) {
-    const { searchQuery, deliveryTime, max, min, from, size, type } = body;
-    const result = await this.searchService.searchIndexItem({
-      size,
-      query: {
-        bool: {
-          must: [
-            {
-              query_string: {
-                fields: [
-                  'username',
-                  'title',
-                  'description',
-                  'basicDescription',
-                  'basicTitle',
-                  'categories',
-                  'subCategories',
-                  'tags',
-                ],
-                query: `*${searchQuery}*`,
-              },
-            },
-            {
-              term: {
-                active: true,
-              },
-            },
-            // if deliveryTime add in filter then add this search
-            deliveryTime && {
-              query_string: {
-                fields: ['expectedDelivery'],
-                query: `*${deliveryTime}*`,
-              },
-            },
-            // if min max add in search then add this filter
-            min &&
-              max && {
-                range: {
-                  price: {
-                    gte: min,
-                    lte: max,
-                  },
-                },
-              },
-          ],
-        },
-      },
-      sort: [
-        {
-          sortId: type === 'forward' ? 'asc' : 'desc',
-        },
-      ],
-      search_after: [from],
-    });
-    const total = result.hits.total as SearchTotalHits;
-    return {
-      statusCode: 200,
-      response: { total: total.value, hits: result.hits.hits },
-      message: 'gig list',
-    };
-  }
-
-  private async gigsSearchBySellerId(searchQuery: string, active: boolean) {
-    const result = await this.searchService.searchIndexItem({
-      query: {
-        bool: {
-          must: [
-            {
-              query_string: {
-                fields: ['sellerId'],
-                query: `*${searchQuery}*`,
-              },
-            },
-            {
-              term: {
-                active,
-              },
-            },
-          ],
-        },
-      },
-    });
-    const total = result.hits.total as SearchTotalHits;
-    return {
-      total: total.value,
-      hits: result.hits.hits,
     };
   }
 }

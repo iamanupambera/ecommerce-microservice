@@ -1,5 +1,4 @@
 import {
-  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsNumberString,
@@ -26,7 +25,7 @@ export class SearchGigDto {
   type: 'forward' | 'backward';
 
   @IsOptional()
-  @IsDateString()
+  @IsString()
   deliveryTime?: string;
 
   @ValidateIf((val) => !!val.max)
