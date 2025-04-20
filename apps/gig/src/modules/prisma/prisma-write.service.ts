@@ -12,7 +12,7 @@ export class PrismaWriteService implements OnModuleInit, OnModuleDestroy {
     readonly configService: ConfigService,
     private readonly logger: LoggerService,
   ) {
-    const dbUrl = configService.getOrThrow<string>('MONGODB_URL');
+    const dbUrl = configService.getOrThrow<string>('MONGODB_GIG_SERVICE_URL');
 
     this.prisma = new PrismaClient({
       datasources: {
