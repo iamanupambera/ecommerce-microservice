@@ -15,10 +15,8 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Notification service is healthy and OK."', () => {
-      expect(appController.getHealth()).toBe(
-        'Notification service is healthy and OK.',
-      );
+    it('should return "GIG service is healthy and OK."', () => {
+      expect(appController.getHealth()).toBe('GIG service is healthy and OK.');
     });
   });
 });
