@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "npm run db:generate",
     "build": "nest build",
     "db:generate": "dotenv -e ../../.env -- prisma generate && prisma format",
     "db:seed": "dotenv -e ../../.env -- prisma db seed",
