@@ -21,7 +21,13 @@ import { WebSocketExceptionFilter } from 'src/shared/filters/ws-validation.filte
 import { GatewayCacheService } from '../gatewayCache/gatewayCache.service';
 
 @UseFilters(new WebSocketExceptionFilter())
-@WebSocketGateway({ path: '/', cors: true })
+@WebSocketGateway({
+  path: '/ws',
+  cors: {
+    origin: [process.env.CLIENT_URL],
+    credentials: true,
+  },
+})
 export class WebsocketClientGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -44,29 +50,25 @@ export class WebsocketClientGateway
     try {
       const authHeader = request.headers['authorization'];
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        throw new Error();
+        throw new Error('Missing or invalid authorization header');
       }
 
       const token = authHeader.split('Bearer ')[1];
       if (!token) {
-        throw new Error();
+        throw new Error('Missing token');
       }
 
       const data = this.jwtService.verify<AuthJwtPayload>(token);
       if (!data) {
-        throw new Error();
+        throw new Error('Invalid token');
       }
 
       const storedOtp = await this.redisService.redis.get(
         `session:${data.id}:${data.sessionId}`,
       );
 
-      if (!storedOtp) {
-        throw new Error();
-      }
-
-      if (storedOtp !== data.otp) {
-        throw new Error();
+      if (!storedOtp || storedOtp !== data.otp) {
+        throw new Error('Session validation failed');
       }
 
       this.logger.log('info', `Client id: ${client} connected`);
@@ -80,9 +82,8 @@ export class WebsocketClientGateway
         data.username,
       );
       this.broadcast('online', response);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      client.close(1008, 'Forbidden');
+    } catch (error: any) {
+      client.close(1008, error?.message);
     }
   }
 
@@ -91,17 +92,14 @@ export class WebsocketClientGateway
     const data = this.storesService.removeClient(client);
     const response = await this.gatewayCacheService.removeLoggedInUserFromCache(
       'loggedInUsers',
-      data.username,
+      data?.username,
     );
 
     this.broadcast('online', response);
   }
 
   @SubscribeMessage('getLoggedInUsers')
-  async loginUserDetailsHandler(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _client: WebSocket,
-  ): Promise<WsResponse<{ response: string[] }>> {
+  async loginUserDetailsHandler(): Promise<WsResponse<{ response: string[] }>> {
     const response =
       await this.gatewayCacheService.getLoggedInUsersFromCache('loggedInUsers');
 

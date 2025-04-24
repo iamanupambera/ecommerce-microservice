@@ -58,8 +58,11 @@ export class GigController {
   }
 
   @MessagePattern({ controller, cmd: 'findOne' })
-  findOne(@Payload('payload') { id }: { id: string }) {
-    return this.gigService.findOne(id);
+  findOne(
+    @Payload('payload') { id }: { id: string },
+    @Payload('user') user: AuthJwtPayload,
+  ) {
+    return this.gigService.findOne(id, user);
   }
 
   @MessagePattern({ controller, cmd: 'update' })

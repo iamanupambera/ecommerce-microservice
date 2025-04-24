@@ -143,12 +143,20 @@ export class GigService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, user: AuthJwtPayload) {
     const gig = await this.searchService.getIndexItemById(id);
 
     if (!gig) {
       throw new NotFoundException(CommonErrors.GigNotFound);
     }
+
+    if (user.username) {
+      await this.redisService.redis.set(
+        `selectedCategories:${user.username}`,
+        gig.categories,
+      );
+    }
+
     return {
       statusCode: 200,
       response: gig,

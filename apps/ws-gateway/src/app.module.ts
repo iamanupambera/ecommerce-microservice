@@ -17,7 +17,7 @@ import { ChatConsumerModule } from './modules/chat-consumer/chat-consumer.module
       injects: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connectionUrl: configService.getOrThrow('ELASTIC_SEARCH_URL'),
-        name: 'auth service',
+        name: 'WS-Gateway service',
         level: 'debug',
       }),
     }),
