@@ -1,4 +1,7 @@
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryDslQueryContainer,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   CreateGigDto,
   SearchGigDto,
@@ -81,7 +84,7 @@ export class GigService {
   async findAll(body: SearchGigDto) {
     const { searchQuery, deliveryTime, max, min, from, size, type } = body;
 
-    const mustQueries = [
+    const mustQueries: QueryDslQueryContainer[] = [
       {
         query_string: {
           fields: [
@@ -102,24 +105,29 @@ export class GigService {
           active: true,
         },
       },
-      // Conditionally add deliveryTime query
-      deliveryTime && {
+    ];
+
+    // add deliveryTime query
+    if (deliveryTime)
+      mustQueries.push({
         query_string: {
           fields: ['expectedDelivery'],
           query: `*${deliveryTime}*`,
+          default_operator: 'AND',
         },
-      },
-      // Conditionally add min and max range query
-      min &&
-        max && {
-          range: {
-            price: {
-              gte: min,
-              lte: max,
-            },
+      });
+
+    // add min and max range query
+    if (min && max) {
+      mustQueries.push({
+        range: {
+          price: {
+            gte: min,
+            lte: max,
           },
         },
-    ].filter(Boolean); // Remove falsy values
+      });
+    }
 
     const result = await this.searchService.searchIndexItem({
       size,
@@ -195,7 +203,7 @@ export class GigService {
             script: {
               script: {
                 source:
-                  "doc['ratingSum'].value != 0 && (doc['ratingSum'].value / doc['ratingsCount'].value == params['threshold'])",
+                  'doc.ratingSum.value != 0 && (doc.ratingSum.value / doc.ratingsCount.value == params.threshold)',
                 lang: 'painless',
                 params: {
                   threshold: 5,
