@@ -22,7 +22,6 @@ model Auth {
   lastActiveAt    DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?     @db.Timestamp
 
   // identityProvider     IdentityProvider      @default(CAL)
   // apiKeys              ApiKey[]

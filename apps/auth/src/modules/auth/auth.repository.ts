@@ -98,29 +98,6 @@ export class AuthRepository {
     return this.dbWrite.prisma.auth.update({ data, where: { id } });
   }
 
-  async delete(userId: number): Promise<Auth> {
-    return this.dbWrite.prisma.auth.delete({
-      where: { id: userId },
-    });
-  }
-
-  async getAllUser() {
-    return this.dbRead.prisma.auth.findMany();
-  }
-
-  /**
-   * @returns get all soft deleted user
-   */
-  async getDeleteUser() {
-    return this.dbRead.prisma.auth.findMany({
-      where: {
-        deletedAt: {
-          not: null,
-        },
-      },
-    });
-  }
-
   async updateUserOTP(
     authId: number,
     otp: string,
