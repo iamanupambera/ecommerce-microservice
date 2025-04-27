@@ -30,12 +30,14 @@ model Gig {
   sortId           Int?
   coverImage       String
   createdAt        DateTime          @default(now()) @map("createdAt")
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?         @db.Timestamp
 }
 
 model RatingCategories {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  gig           Gig           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  sellerId      String        @unique @db.ObjectId
+  gig           Gig           @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  gigId         String        @unique @db.ObjectId
   five          RatingDetails @relation("FiveRating", fields: [fiveRatingId], references: [id], onDelete: Cascade)
   fiveRatingId  String        @unique @db.ObjectId
   four          RatingDetails @relation("FourRating", fields: [fourRatingId], references: [id], onDelete: Cascade)

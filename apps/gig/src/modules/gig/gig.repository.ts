@@ -83,6 +83,39 @@ export class GigRepository {
   }
 
   async deleteGig(gigId: string) {
-    await this.dbWrite.prisma.gig.delete({ where: { id: gigId } });
+    return this.dbWrite.prisma.gig.delete({ where: { id: gigId } });
+  }
+
+  /**
+   * @returns gig list with deleted gig
+   */
+  async getGigListWithDeletedGig() {
+    return this.dbRead.prisma.gig.findMany({
+      where: {
+        OR: [
+          {
+            deletedAt: {
+              not: null,
+            },
+          },
+          {
+            deletedAt: null,
+          },
+        ],
+      },
+    });
+  }
+
+  /**
+   * @returns get all soft deleted gig
+   */
+  async getDeleteGig() {
+    return this.dbRead.prisma.gig.findMany({
+      where: {
+        deletedAt: {
+          not: null,
+        },
+      },
+    });
   }
 }

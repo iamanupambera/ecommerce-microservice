@@ -367,8 +367,8 @@ export class GigService {
     };
   }
 
-  async remove(gigId: string, sellerId: string) {
-    await this.gigRepository.deleteGig(gigId);
+  async remove(gigId: string) {
+    const gig = await this.gigRepository.deleteGig(gigId);
 
     // update user gig count
     this.userService
@@ -386,7 +386,7 @@ export class GigService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
-            gigSellerId: sellerId,
+            gigSellerId: gig.sellerId,
             count: -1,
           },
           user: null,

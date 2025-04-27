@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GigService } from './gig.service';
 import {
   CreateGigDto,
+  findByIdDto,
   SearchGigDto,
   UpdateGigDto,
 } from '@repo/validator/index';
@@ -25,44 +26,41 @@ export class GigController {
   }
 
   @MessagePattern({ controller, cmd: 'findAll' })
-  findAll(
-    @Payload('payload')
-    body: SearchGigDto,
-  ) {
+  findAll(@Payload('payload') body: SearchGigDto) {
     return this.gigService.findAll(body);
   }
 
   @MessagePattern({ controller, cmd: 'findSellerGigs' })
-  findSellerGigs(@Payload('payload') body: { sellerId: string }) {
-    return this.gigService.findSellerGigs(body.sellerId);
+  findSellerGigs(@Payload('payload') body: findByIdDto) {
+    return this.gigService.findSellerGigs(body.id);
   }
 
   @MessagePattern({ controller, cmd: 'findSellerInactiveGigs' })
-  findSellerInactiveGigs(@Payload('payload') body: { sellerId: string }) {
-    return this.gigService.findSellerInactiveGigs(body.sellerId);
+  findSellerInactiveGigs(@Payload('payload') body: findByIdDto) {
+    return this.gigService.findSellerInactiveGigs(body.id);
   }
 
   @MessagePattern({ controller, cmd: 'findGigsByCategory' })
-  findGigsByCategory(@Payload('payload') body: { username: string }) {
-    return this.gigService.findGigsByCategory(body.username);
+  findGigsByCategory(@Payload('user') { username }: AuthJwtPayload) {
+    return this.gigService.findGigsByCategory(username);
   }
 
   @MessagePattern({ controller, cmd: 'findTopRatedGigsByCategory' })
-  findTopRatedGigsByCategory(@Payload('payload') body: { username: string }) {
-    return this.gigService.findTopRatedGigsByCategory(body.username);
+  findTopRatedGigsByCategory(@Payload('user') { username }: AuthJwtPayload) {
+    return this.gigService.findTopRatedGigsByCategory(username);
   }
 
   @MessagePattern({ controller, cmd: 'findMoreGigsLikeThis' })
-  findMoreGigsLikeThis(@Payload('payload') body: { gigId: string }) {
-    return this.gigService.findMoreGigsLikeThis(body.gigId);
+  findMoreGigsLikeThis(@Payload('payload') body: findByIdDto) {
+    return this.gigService.findMoreGigsLikeThis(body.id);
   }
 
   @MessagePattern({ controller, cmd: 'findOne' })
   findOne(
-    @Payload('payload') { id }: { id: string },
+    @Payload('payload') body: findByIdDto,
     @Payload('user') user: AuthJwtPayload,
   ) {
-    return this.gigService.findOne(id, user);
+    return this.gigService.findOne(body.id, user);
   }
 
   @MessagePattern({ controller, cmd: 'update' })
@@ -82,14 +80,12 @@ export class GigController {
   }
 
   @MessagePattern({ controller, cmd: 'changeStatus' })
-  changeStatus(
-    @Payload('payload') { status, gigId }: { gigId: string; status: boolean },
-  ) {
+  changeStatus(@Payload('payload') { status, gigId }: any) {
     return this.gigService.changeStatus(gigId, status);
   }
 
   @MessagePattern({ controller, cmd: 'remove' })
-  remove(@Payload('payload') body: { gigId: string; sellerId: string }) {
-    return this.gigService.remove(body.gigId, body.sellerId);
+  remove(@Payload('payload') body: findByIdDto) {
+    return this.gigService.remove(body.id);
   }
 }
