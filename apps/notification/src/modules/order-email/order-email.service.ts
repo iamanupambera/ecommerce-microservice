@@ -1,24 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { MailService } from '../email/mail.service';
+import { OfferEmailDto } from '@repo/validator/index';
 
 @Injectable()
 export class OrderEmailService {
-  create(createOrderEmailDto: object) {
-    return 'This action adds a new orderEmail';
-  }
+  constructor(private mailService: MailService) {}
 
-  findAll() {
-    return `This action returns all orderEmail`;
-  }
+  async sendOfferEmail(body: OfferEmailDto) {
+    await this.mailService.sendOfferEmail(body);
 
-  findOne(id: number) {
-    return `This action returns a #${id} orderEmail`;
-  }
-
-  update(id: number, updateOrderEmailDto: object) {
-    return `This action updates a #${id} orderEmail`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} orderEmail`;
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'offer Email sent successfully',
+    };
   }
 }

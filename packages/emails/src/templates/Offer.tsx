@@ -1,6 +1,3 @@
-const sender = '';
-export const subject = `You have received a custom offer from ${sender}`;
-
 export default function Offer({
   buyerUsername,
   sellerUsername,
@@ -18,9 +15,9 @@ export default function Offer({
   appLink: string;
   appIcon: string;
   description: string;
-  deliveryDays: string;
+  deliveryDays: number;
   offerLink: string;
-  amount: string;
+  amount: number;
 }) {
   return (
     <div>

@@ -1,4 +1,5 @@
 import {
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -16,9 +17,11 @@ import { StoresService } from '../stores/stores.service';
 import { JwtService } from '@nestjs/jwt';
 import { Server, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import { UseFilters } from '@nestjs/common';
+import { UseFilters, UsePipes } from '@nestjs/common';
 import { WebSocketExceptionFilter } from 'src/shared/filters/ws-validation.filter';
 import { GatewayCacheService } from '../gatewayCache/gatewayCache.service';
+import { WsValidationPipe } from 'src/shared/pipes/ws-validation.pipe';
+import { ChatMessageDto } from '@repo/validator/index';
 
 @UseFilters(new WebSocketExceptionFilter())
 @WebSocketGateway({
@@ -109,17 +112,15 @@ export class WebsocketClientGateway
     };
   }
 
-  // @SubscribeMessage('chat')
-  // @UsePipes(new WsValidationPipe())
-  // chatHandler(
-  //   client: WebSocket,
-  //   @MessageBody() payload: ChatMessageDto,
-  // ): WsResponse<number> {
-  //   this.logger.log('info', `Message received from client id: ${client}`);
-  //   console.log(payload);
-  //   this.logger.log('info', `Payload: ${payload}`);
-  //   return { event: 'events', data: 1 };
-  // }
+  @SubscribeMessage('chat')
+  @UsePipes(new WsValidationPipe())
+  chatHandler(
+    client: WebSocket,
+    @MessageBody() payload: ChatMessageDto,
+  ): WsResponse<object> {
+    this.storesService.addUserToChannel(client, `conversation${payload.id}`);
+    return { event: 'events', data: { message: 'success' } };
+  }
 
   broadcast<T>(event: string, response: T) {
     this.server.clients.forEach((client) => {

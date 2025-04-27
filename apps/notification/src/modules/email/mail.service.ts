@@ -107,4 +107,42 @@ export class MailService {
       );
     }
   }
+
+  async sendOfferEmail(body: {
+    buyerUsername: string;
+    sellerUsername: string;
+    title: string;
+    description: string;
+    deliveryDays: number;
+    offerLink: string;
+    amount: number;
+    receiverEmail: string;
+    sender: string;
+  }) {
+    const html = await renderEmail('Offer', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      buyerUsername: body.buyerUsername,
+      sellerUsername: body.sellerUsername,
+      title: body.title,
+      description: body.description,
+      deliveryDays: body.deliveryDays,
+      offerLink: body.offerLink,
+      amount: body.amount,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: body.receiverEmail,
+        subject: `You have received a custom offer from ${body.sender}`,
+        html,
+      });
+    } catch (error) {
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOfferEmail',
+        error,
+      );
+    }
+  }
 }

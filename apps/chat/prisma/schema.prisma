@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_CHAT_SERVICE_URL")
+}
+
+model Conversation {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  senderUsername   String
+  receiverUsername String
+  message          Message[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastMessageId    String?   @unique @db.ObjectId
+  lastMessage      Message?  @relation(name: "lastMessage", fields: [lastMessageId], references: [id])
+
+  @@index(fields: [receiverUsername, senderUsername])
+  @@map("conversation")
+}
+
+model Message {
+  id                      String        @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId          String        @db.ObjectId
+  senderUsername          String
+  receiverUsername        String
+  senderPicture           String
+  receiverPicture         String
+  message                 String
+  file                    String        @default("")
+  fileType                String        @default("")
+  fileSize                String        @default("")
+  fileName                String        @default("")
+  gigId                   String        @default("") @db.ObjectId
+  buyerId                 String        @db.ObjectId
+  sellerId                String        @db.ObjectId
+  isRead                  Boolean       @default(false)
+  hasOffer                Boolean       @default(false)
+  Offer                   Offer?
+  conversation            Conversation  @relation(fields: [conversationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  conversationLastMessage Conversation? @relation(name: "lastMessage")
+
+  @@index(fields: [conversationId])
+  @@index([conversationId, createdAt])
+  @@map("message")
+}
+
+model Offer {
+  messageId       String      @id @map("_id") @db.ObjectId
+  message         Message     @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  gigTitle        String      @default("")
+  price           Int         @default(0)
+  description     String      @default("")
+  deliveryInDays  Int         @default(0)
+  oldDeliveryDate String      @default("")
+  newDeliveryDate String      @default("")
+  status          OfferStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  CANCELLED
+}

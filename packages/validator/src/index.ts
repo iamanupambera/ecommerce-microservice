@@ -13,6 +13,7 @@ export {
   OtpEmailDto,
   ForgotPasswordDto,
   PasswordChangeDto,
+  OfferEmailDto,
 } from './notification';
 
 export {
@@ -27,3 +28,13 @@ export {
 } from './user';
 
 export { CreateGigDto, UpdateGigDto, SearchGigDto } from './gig';
+
+export {
+  CreateMessageDto,
+  CreateConversationDto,
+  UpdateOffer,
+  UpdateMessageDto,
+  GetByIdDto,
+} from './chat';
+
+export { ChatMessageDto, MessageEventDto } from './web-socket';

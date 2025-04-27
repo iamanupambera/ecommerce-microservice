@@ -1,24 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { MessageEventDto } from '@repo/validator/index';
+import { StoresService } from '../stores/stores.service';
 
 @Injectable()
 export class ChatConsumerService {
-  create(createChatConsumerDto: any) {
-    return createChatConsumerDto;
+  constructor(private readonly storesService: StoresService) {}
+
+  createMessage(body: MessageEventDto) {
+    const clients = this.storesService.getClientsInChannel(
+      `conversation${body.conversationId}`,
+    );
+    clients.forEach((client) => {
+      client.send(
+        JSON.stringify({ event: 'message received', data: { response: body } }),
+      );
+    });
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'success',
+    };
   }
 
-  findAll() {
-    return `This action returns all chatConsumer`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} chatConsumer`;
-  }
-
-  update(id: number, updateChatConsumerDto: any) {
-    return updateChatConsumerDto;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chatConsumer`;
+  updateMessage(body: MessageEventDto) {
+    const clients = this.storesService.getClientsInChannel(
+      `conversation${body.conversationId}`,
+    );
+    clients.forEach((client) => {
+      client.send(
+        JSON.stringify({ event: 'message update', data: { response: body } }),
+      );
+    });
+    return {
+      statusCode: 200,
+      response: {},
+      message: 'success',
+    };
   }
 }
