@@ -8,6 +8,7 @@ import { AppModule } from './app.module';
 import compression from 'compression';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -70,6 +71,17 @@ function setupApplicationMiddleware(app: NestExpressApplication) {
       forbidNonWhitelisted: true,
     }),
   );
+
+  const options = new DocumentBuilder()
+    .setTitle('Freelancing market place')
+    .setDescription('The Freelancing market place API description')
+    .setVersion('1.0')
+    .addTag('Freelancing market place')
+    .addBearerAuth()
+    .addCookieAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api-doc', app, document);
 }
 
 function setupCors(app: NestExpressApplication, configService: ConfigService) {
