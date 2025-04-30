@@ -70,7 +70,7 @@ export class GigService {
       );
   }
 
-  async findSellerGigs(sellerId: string, user: AuthJwtPayload) {
+  async findSellerGigs(id: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -85,7 +85,7 @@ export class GigService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
-          payload: { sellerId },
+          payload: { id },
           user,
         },
       )
@@ -99,7 +99,7 @@ export class GigService {
       );
   }
 
-  async findSellerInactiveGigs(sellerId: string, user: AuthJwtPayload) {
+  async findSellerInactiveGigs(id: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -114,7 +114,7 @@ export class GigService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
-          payload: { sellerId },
+          payload: { id },
           user,
         },
       )
@@ -186,7 +186,7 @@ export class GigService {
       );
   }
 
-  async findMoreGigsLikeThis(gigId: string, user: AuthJwtPayload) {
+  async findMoreGigsLikeThis(id: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -201,7 +201,7 @@ export class GigService {
         {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
-          payload: { gigId },
+          payload: { id },
           user,
         },
       )
@@ -215,7 +215,7 @@ export class GigService {
       );
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, user: AuthJwtPayload) {
     return this.gigService
       .send<
         object,
@@ -231,7 +231,7 @@ export class GigService {
           userToken: null,
           serviceToken: await this.gatewayJwtService.generateToken('GIG'),
           payload: { id },
-          user: null,
+          user,
         },
       )
       .pipe(

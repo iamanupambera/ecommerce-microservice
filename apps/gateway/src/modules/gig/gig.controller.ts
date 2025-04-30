@@ -91,9 +91,15 @@ export class GigController {
     return this.gigService.findMoreGigsLikeThis(gigId, user);
   }
 
+  @Get('auth/:id')
+  @UseGuards(AuthGuard('jwt'))
+  findOneWithLogin(@Param('id') id: string, @AuthUser() user: AuthJwtPayload) {
+    return this.gigService.findOne(id, user);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.gigService.findOne(id);
+  findOneWithLoutogin(@Param('id') id: string) {
+    return this.gigService.findOne(id, null);
   }
 
   @Patch(':id')
@@ -116,13 +122,9 @@ export class GigController {
     return this.gigService.changeStatus({ ...body, gigId }, user);
   }
 
-  @Delete(':gigId/:sellerId')
+  @Delete(':gigId')
   @UseGuards(AuthGuard('jwt'))
-  remove(
-    @Param('gigId') gigId: string,
-    @Param('sellerId') sellerId: string,
-    @AuthUser() user: AuthJwtPayload,
-  ) {
-    return this.gigService.remove({ gigId, sellerId }, user);
+  remove(@Param('gigId') gigId: string, @AuthUser() user: AuthJwtPayload) {
+    return this.gigService.remove({ id: gigId }, user);
   }
 }
