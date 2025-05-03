@@ -3,9 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from '@repo/modules/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { WebsocketClientModule } from './modules/websocket-client/websocket-client.module';
-import { ChatConsumerModule } from './modules/chat-consumer/chat-consumer.module';
-import { OrderConsumerModule } from './modules/order-consumer/order-consumer.module';
+import { GatewayJwtModule } from './modules/gatewayJwt/gatewayJwt.module';
 
 @Module({
   imports: [
@@ -18,13 +16,11 @@ import { OrderConsumerModule } from './modules/order-consumer/order-consumer.mod
       injects: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connectionUrl: configService.getOrThrow('ELASTIC_SEARCH_URL'),
-        name: 'WS-Gateway service',
+        name: 'order service',
         level: 'debug',
       }),
     }),
-    WebsocketClientModule,
-    ChatConsumerModule,
-    OrderConsumerModule,
+    GatewayJwtModule,
   ],
   controllers: [AppController],
   providers: [AppService],

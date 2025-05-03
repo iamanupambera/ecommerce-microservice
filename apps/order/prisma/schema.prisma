@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_ORDER_SERVICE_URL")
+}
+
+model Order {
+  id                  String            @id @default(auto()) @map("_id") @db.ObjectId
+  gigId               String            @db.ObjectId
+  sellerId            String            @db.ObjectId
+  sellerUsername      String
+  sellerImage         String
+  sellerEmail         String
+  gigCoverImage       String
+  gigMainTitle        String
+  gigBasicTitle       String
+  gigBasicDescription String
+  buyerId             String            @db.ObjectId
+  buyerUsername       String
+  buyerEmail          String
+  buyerImage          String
+  status              OrderStatus       @default(PENDING)
+  orderId             String            @unique @db.ObjectId
+  quantity            Int
+  price               Float
+  serviceFee          Float             @default(0)
+  requirements        String            @default("")
+  approvedAt          DateTime?
+  paymentIntent       String?
+  dateOrdered         DateTime          @default(now())
+  offer               Offer?
+  deliveredWork       DeliveredWork[]
+  requestExtension    RequestExtension?
+  events              Events?
+  buyerReviewId       String            @unique @db.ObjectId
+  sellerReviewId      String            @unique @db.ObjectId
+  buyerReview         Review            @relation("buyerReview", fields: [buyerReviewId], references: [id])
+  sellerReview        Review            @relation("sellerReview", fields: [sellerReviewId], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+}
+
+model Offer {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  gigTitle        String
+  price           Float
+  description     String
+  deliveryInDays  Int
+  oldDeliveryDate DateTime?
+  newDeliveryDate DateTime?
+  accepted        Boolean
+  cancelled       Boolean
+  reason          String    @default("")
+  orderId         String    @unique @db.ObjectId
+  order           Order?    @relation(fields: [orderId], references: [id])
+}
+
+model DeliveredWork {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId  String  @db.ObjectId
+  message  String?
+  file     String?
+  fileType String?
+  fileSize String?
+  fileName String?
+  order    Order   @relation(fields: [orderId], references: [id])
+}
+
+model RequestExtension {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  originalDate String @default("")
+  newDate      String @default("")
+  days         Int    @default(0)
+  reason       String @default("")
+  orderId      String @unique @db.ObjectId
+  order        Order? @relation(fields: [orderId], references: [id])
+}
+
+model Events {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  placeOrder         DateTime?
+  requirements       DateTime?
+  orderStarted       DateTime?
+  deliveryDateUpdate DateTime?
+  orderDelivered     DateTime?
+  buyerReview        DateTime?
+  sellerReview       DateTime?
+  orderId            String?   @unique @db.ObjectId
+  order              Order?    @relation(fields: [orderId], references: [id])
+}
+
+model Review {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating  Float    @default(0)
+  review  String   @default("")
+  created DateTime @default(now())
+  five    Order?   @relation("buyerReview")
+  four    Order?   @relation("sellerReview")
+}
+
+model Notification {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  userTo           String   @default("") @db.String
+  senderUsername   String   @default("")
+  senderPicture    String   @default("")
+  receiverUsername String   @default("")
+  receiverPicture  String   @default("")
+  isRead           Boolean  @default(false)
+  message          String   @default("")
+  orderId          String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  APPROVED
+  DELIVERED
+  CANCELLED
+}

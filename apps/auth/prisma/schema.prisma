@@ -46,6 +46,7 @@ model AuthPassword {
   @@index([authId])
 }
 
+/// @deprecated This model is deprecated and will be removed in future versions.
 model ResetPasswordRequest {
   authId    Int      @id
   auth      Auth     @relation(fields: [authId], references: [id], onDelete: Cascade)
@@ -97,6 +98,7 @@ model AuthSession {
   @@index([authId])
 }
 
+/// @deprecated This model is deprecated and will be removed in future versions.
 model VerifiedEmail {
   id                     Int     @id @default(autoincrement())
   emailVerificationToken String?
@@ -107,6 +109,7 @@ model VerifiedEmail {
   @@index([authId])
 }
 
+/// @deprecated This model is deprecated and will be removed in future versions.
 model AuthOTP {
   id      Int      @id @default(autoincrement())
   otp     String?
