@@ -5,10 +5,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { OrderRepository } from './order.repository';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
     PrismaModule,
+    NotificationModule,
     ClientsModule.registerAsync([
       {
         name: 'USER_SERVICE',
@@ -48,5 +50,6 @@ import { OrderRepository } from './order.repository';
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderRepository],
+  exports: [OrderRepository],
 })
 export class OrderModule {}

@@ -14,6 +14,7 @@ import {
 } from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class OrderService {
@@ -27,6 +28,7 @@ export class OrderService {
     private readonly notificationService: ClientProxy,
     private readonly gatewayJwtService: GatewayJwtService,
     private readonly logger: LoggerService,
+    private readonly orderNotificationService: NotificationService,
   ) {
     this.stripe = new Stripe(this.configService.getOrThrow('STRIPE_API_KEY'), {
       apiVersion: '2025-04-30.basil',
@@ -190,11 +192,15 @@ export class OrderService {
         },
       });
 
-    sendNotification(
-      order,
-      orderData.sellerUsername,
-      'placed an order for your gig.',
-    );
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo: order.sellerUsername,
+      message: 'placed an order for your gig.',
+    });
 
     return {
       statusCode: 201,
@@ -278,11 +284,15 @@ export class OrderService {
         },
       });
 
-    sendNotification(
-      order,
-      order.buyerUsername,
-      'requested for an order delivery date extension.',
-    );
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo: order.buyerUsername,
+      message: 'requested for an order delivery date extension.',
+    });
 
     return {
       statusCode: 200,
@@ -323,7 +333,19 @@ export class OrderService {
       payload['header'] = 'Request Rejected';
       payload['type'] = body.type;
       payload['message'] = 'You can contact the buyer for more information.';
+
+      // send notification
+      await this.orderNotificationService.sendNotification({
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.sellerUsername,
+        message: 'rejected your order delivery date extension request.',
+      });
     }
+
     // send email
     this.notificationService
       .send<
@@ -356,13 +378,6 @@ export class OrderService {
           );
         },
       });
-
-    const order = { sellerUsername: '' };
-    sendNotification(
-      order,
-      order.sellerUsername,
-      'rejected your order delivery date extension request.',
-    );
 
     return {
       statusCode: 200,
@@ -446,11 +461,15 @@ export class OrderService {
         },
       });
 
-    sendNotification(
-      order,
-      order.sellerUsername,
-      'approved your order delivery.',
-    );
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo: order.sellerUsername,
+      message: 'approved your order delivery.',
+    });
 
     return {
       statusCode: 200,
@@ -508,7 +527,16 @@ export class OrderService {
         },
       });
 
-    sendNotification(order, order.buyerUsername, 'delivered your order.');
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo: order.buyerUsername,
+      message: 'delivered your order.',
+    });
+
     return {
       statusCode: 200,
       response: order,
@@ -518,11 +546,19 @@ export class OrderService {
 
   async updateOrderReview(body: UpdateOrderReviewDto) {
     const order = await this.orderRepository.updateOrderReview(body);
-    sendNotification(
-      order,
-      body.type === 'buyer-review' ? order.sellerUsername : order.buyerUsername,
-      `left you a ${body.rating} star review`,
-    );
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo:
+        body.type === 'buyer-review'
+          ? order.sellerUsername
+          : order.buyerUsername,
+      message: `left you a ${body.rating} star review`,
+    });
+
     return {
       statusCode: 200,
       response: order,
@@ -603,11 +639,16 @@ export class OrderService {
         },
       });
 
-    sendNotification(
-      order,
-      order.sellerUsername,
-      'cancelled your order delivery.',
-    );
+    await this.orderNotificationService.sendNotification({
+      orderId: order.id,
+      senderUsername: order.sellerUsername,
+      senderPicture: order.sellerImage,
+      receiverUsername: order.buyerUsername,
+      receiverPicture: order.buyerImage,
+      userTo: order.sellerUsername,
+      message: 'cancelled your order delivery.',
+    });
+
     return {
       statusCode: 200,
       response: order,
@@ -615,6 +656,3 @@ export class OrderService {
     };
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function sendNotification(data: any, str1: string, str2: string) {}

@@ -8,7 +8,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    forceCloseConnections: true,
+  });
 
   const configService = app.get(ConfigService);
   const logger = app.get(LoggerService);
