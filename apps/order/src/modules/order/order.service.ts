@@ -28,7 +28,7 @@ export class OrderService {
     private readonly gatewayJwtService: GatewayJwtService,
     private readonly logger: LoggerService,
   ) {
-    this.stripe = new Stripe(this.configService.get('STRIPE_API_KEY'), {
+    this.stripe = new Stripe(this.configService.getOrThrow('STRIPE_API_KEY'), {
       apiVersion: '2025-04-30.basil',
       typescript: true,
     });
