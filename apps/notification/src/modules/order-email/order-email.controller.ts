@@ -2,7 +2,13 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrderEmailService } from './order-email.service';
 import { GatewayJwtGuard } from '../../shared/gatewayJwt.guard';
-import { OfferEmailDto } from '@repo/validator/index';
+import {
+  ApproveOrderExtendRequestDto,
+  OfferEmailDto,
+  OrderDeliveredNotificationDto,
+  OrderExtendDto,
+  PlacedOrderDto,
+} from '@repo/validator/index';
 const controller = 'order_email_controller';
 
 @Controller()
@@ -16,26 +22,26 @@ export class OrderEmailController {
   }
 
   @MessagePattern({ controller, cmd: 'sendOrderPlaced' })
-  sendOrderPlaced(@Payload('payload') createOrderEmailDto: any) {
-    return this.orderEmailService.sendOrderPlaced(createOrderEmailDto);
+  sendOrderPlaced(@Payload('payload') placedOrderDto: PlacedOrderDto) {
+    return this.orderEmailService.sendOrderPlaced(placedOrderDto);
   }
 
   @MessagePattern({ controller, cmd: 'sendOrderExtension' })
-  sendOrderExtension(@Payload('payload') createOrderEmailDto: any) {
-    return this.orderEmailService.sendOrderExtension(createOrderEmailDto);
+  sendOrderExtension(@Payload('payload') orderExtendDto: OrderExtendDto) {
+    return this.orderEmailService.sendOrderExtension(orderExtendDto);
   }
 
   @MessagePattern({ controller, cmd: 'orderExtensionApprovalRequest' })
-  orderExtensionApprovalRequest(@Payload('payload') createOrderEmailDto: any) {
-    return this.orderEmailService.orderExtensionApprovalRequest(
-      createOrderEmailDto,
-    );
+  orderExtensionApprovalRequest(
+    @Payload('payload') body: ApproveOrderExtendRequestDto,
+  ) {
+    return this.orderEmailService.orderExtensionApprovalRequest(body);
   }
 
   @MessagePattern({ controller, cmd: 'orderDeliveredNotification' })
-  orderDeliveredNotification(@Payload('payload') createOrderEmailDto: any) {
-    return this.orderEmailService.orderDeliveredNotification(
-      createOrderEmailDto,
-    );
+  orderDeliveredNotification(
+    @Payload('payload') body: OrderDeliveredNotificationDto,
+  ) {
+    return this.orderEmailService.orderDeliveredNotification(body);
   }
 }

@@ -14,6 +14,10 @@ export {
   ForgotPasswordDto,
   PasswordChangeDto,
   OfferEmailDto,
+  PlacedOrderDto,
+  OrderExtendDto,
+  ApproveOrderExtendRequestDto,
+  OrderDeliveredNotificationDto,
 } from './notification';
 
 export {

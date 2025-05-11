@@ -2,6 +2,7 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GigService } from './gig.service';
 import {
+  ChangeGigStatusDto,
   CreateGigDto,
   findByIdDto,
   SearchGigDto,
@@ -80,7 +81,7 @@ export class GigController {
   }
 
   @MessagePattern({ controller, cmd: 'changeStatus' })
-  changeStatus(@Payload('payload') { status, gigId }: any) {
+  changeStatus(@Payload('payload') { status, gigId }: ChangeGigStatusDto) {
     return this.gigService.changeStatus(gigId, status);
   }
 

@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from '../email/mail.service';
-import { OfferEmailDto } from '@repo/validator/index';
+import {
+  ApproveOrderExtendRequestDto,
+  OfferEmailDto,
+  OrderDeliveredNotificationDto,
+  OrderExtendDto,
+  PlacedOrderDto,
+} from '@repo/validator/index';
 
 @Injectable()
 export class OrderEmailService {
@@ -16,18 +22,7 @@ export class OrderEmailService {
     };
   }
 
-  async sendOrderPlaced(body: {
-    orderId: string;
-    orderDue: string;
-    amount: number;
-    buyerUsername: string;
-    sellerUsername: string;
-    title: string;
-    description: string;
-    requirements: string;
-    orderUrl: string;
-    receiverEmail: string;
-  }) {
+  async sendOrderPlaced(body: PlacedOrderDto) {
     await this.mailService.sendOrderPlaced(body);
 
     return {
@@ -37,15 +32,7 @@ export class OrderEmailService {
     };
   }
 
-  async sendOrderExtension(body: {
-    buyerUsername: string;
-    sellerUsername: string;
-    originalDate: string;
-    newDate: string;
-    reason: string;
-    orderUrl: string;
-    receiverEmail: string;
-  }) {
+  async sendOrderExtension(body: OrderExtendDto) {
     await this.mailService.sendOrderExtension(body);
 
     return {
@@ -55,16 +42,7 @@ export class OrderEmailService {
     };
   }
 
-  async orderExtensionApprovalRequest(body: {
-    subject: string;
-    buyerUsername: string;
-    sellerUsername: string;
-    orderUrl: string;
-    header: string;
-    message: string;
-    type: string;
-    receiverEmail: string;
-  }) {
+  async orderExtensionApprovalRequest(body: ApproveOrderExtendRequestDto) {
     await this.mailService.orderExtensionApprovalRequest(body);
 
     return {
@@ -74,13 +52,7 @@ export class OrderEmailService {
     };
   }
 
-  async orderDeliveredNotification(body: {
-    buyerUsername: string;
-    sellerUsername: string;
-    title: string;
-    orderUrl: string;
-    receiverEmail: string;
-  }) {
+  async orderDeliveredNotification(body: OrderDeliveredNotificationDto) {
     await this.mailService.orderDeliveredNotification(body);
 
     return {

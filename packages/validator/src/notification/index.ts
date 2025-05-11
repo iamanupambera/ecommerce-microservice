@@ -3,3 +3,7 @@ export { OtpEmailDto } from './OtpEmail.dto';
 export { ForgotPasswordDto } from './ForgotPassword.dto';
 export { PasswordChangeDto } from './PasswordChange.dto';
 export { OfferEmailDto } from './OfferEmail.dto';
+export { PlacedOrderDto } from './PlacedOrder.dto';
+export { OrderExtendDto } from './OrderExtend.dto';
+export { ApproveOrderExtendRequestDto } from './ApproveOrderExtendRequest.dto';
+export { OrderDeliveredNotificationDto } from './orderDeliveredNotification.dto';
