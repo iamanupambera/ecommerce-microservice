@@ -10,6 +10,6 @@ export class BuyerPurchasedGigUpdateDto {
   purchasedGigId: string;
 
   @IsNotEmpty()
-  @IsEnum(['purchased-gigs', 'remove-gigs'])
-  type: 'purchased-gigs' | 'remove-gigs';
+  @IsEnum(['purchased-gigs', 'cancel-order'])
+  type: 'purchased-gigs' | 'cancel-order';
 }

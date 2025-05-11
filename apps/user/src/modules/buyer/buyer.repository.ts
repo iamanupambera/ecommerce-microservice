@@ -53,7 +53,7 @@ export class BuyerRepository {
   async updateBuyerPurchasedGigsProp(
     buyerId: string,
     purchasedGigId: string,
-    type: 'purchased-gigs' | 'remove-gigs',
+    type: 'purchased-gigs' | 'cancel-order',
   ) {
     if (type === 'purchased-gigs') {
       return this.dbWrite.prisma.buyer.update({

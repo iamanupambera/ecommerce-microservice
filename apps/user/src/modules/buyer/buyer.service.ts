@@ -70,7 +70,7 @@ export class BuyerService {
     };
   }
 
-  async buyerPurchasedGigs({
+  async purchasedGigs({
     buyerId,
     purchasedGigId,
     type,

@@ -29,8 +29,8 @@ export class BuyerController {
     return this.buyerService.findOne(payload.username);
   }
 
-  @MessagePattern({ controller, cmd: 'buyerPurchasedGigs' })
-  buyerPurchasedGigs(@Payload('payload') payload: BuyerPurchasedGigUpdateDto) {
-    return this.buyerService.buyerPurchasedGigs(payload);
+  @MessagePattern({ controller, cmd: 'purchasedGigs' })
+  purchasedGigs(@Payload('payload') payload: BuyerPurchasedGigUpdateDto) {
+    return this.buyerService.purchasedGigs(payload);
   }
 }

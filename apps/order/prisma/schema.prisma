@@ -38,25 +38,24 @@ model Order {
   events              Events?
   buyerReviewId       String            @unique @db.ObjectId
   sellerReviewId      String            @unique @db.ObjectId
-  buyerReview         Review            @relation("buyerReview", fields: [buyerReviewId], references: [id])
-  sellerReview        Review            @relation("sellerReview", fields: [sellerReviewId], references: [id])
+  buyerReview         Review?           @relation("buyerReview", fields: [buyerReviewId], references: [id])
+  sellerReview        Review?           @relation("sellerReview", fields: [sellerReviewId], references: [id])
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 }
 
 model Offer {
-  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
   gigTitle        String
   price           Float
   description     String
   deliveryInDays  Int
   oldDeliveryDate DateTime?
   newDeliveryDate DateTime?
-  accepted        Boolean
-  cancelled       Boolean
-  reason          String    @default("")
-  orderId         String    @unique @db.ObjectId
-  order           Order?    @relation(fields: [orderId], references: [id])
+  status          OfferStatus @default(PENDING)
+  reason          String      @default("")
+  orderId         String      @unique @db.ObjectId
+  order           Order?      @relation(fields: [orderId], references: [id])
 }
 
 model DeliveredWork {
@@ -121,4 +120,10 @@ enum OrderStatus {
   APPROVED
   DELIVERED
   CANCELLED
+}
+
+enum OfferStatus {
+  ACCEPT
+  CANCELLED
+  PENDING
 }

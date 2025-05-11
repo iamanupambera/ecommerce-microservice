@@ -1,6 +1,3 @@
-const sellerUsername = '';
-export const subject = `You received a delivery extension request from ${sellerUsername}`;
-
 export default function OrderExtension({
   appLink,
   appIcon,

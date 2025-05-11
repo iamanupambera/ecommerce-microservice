@@ -44,3 +44,5 @@ export {
 } from './chat';
 
 export { ChatMessageDto, MessageEventDto } from './web-socket';
+
+export { createOrderDto, UpdateOrderDto } from './order';

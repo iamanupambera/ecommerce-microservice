@@ -1,6 +1,3 @@
-const buyerUsername = '';
-export const subject = `You've received an order from ${buyerUsername}`;
-
 export default function OrderPlaced({
   appLink,
   appIcon,
@@ -23,7 +20,7 @@ export default function OrderPlaced({
   orderDue: string;
   title: string;
   description: string;
-  amount: string;
+  amount: number;
   requirements: string;
 }) {
   return (

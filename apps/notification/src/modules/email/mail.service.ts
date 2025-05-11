@@ -145,4 +145,147 @@ export class MailService {
       );
     }
   }
+
+  async sendOrderPlaced(body: {
+    orderId: string;
+    orderDue: string;
+    amount: number;
+    buyerUsername: string;
+    sellerUsername: string;
+    title: string;
+    description: string;
+    requirements: string;
+    orderUrl: string;
+    receiverEmail: string;
+  }) {
+    const html = await renderEmail('OrderPlaced', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      orderId: body.orderId,
+      orderDue: body.orderDue,
+      amount: body.amount,
+      buyerUsername: body.buyerUsername,
+      sellerUsername: body.sellerUsername,
+      title: body.title,
+      description: body.description,
+      requirements: body.requirements,
+      orderUrl: body.orderUrl,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: body.receiverEmail,
+        subject: `You've received an order from ${body.buyerUsername}`,
+        html,
+      });
+    } catch (error) {
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOrderPlaced',
+        error,
+      );
+    }
+  }
+
+  async sendOrderExtension(body: {
+    buyerUsername: string;
+    sellerUsername: string;
+    originalDate: string;
+    newDate: string;
+    reason: string;
+    orderUrl: string;
+    receiverEmail: string;
+  }) {
+    const html = await renderEmail('OrderExtension', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      buyerUsername: body.buyerUsername,
+      sellerUsername: body.sellerUsername,
+      orderUrl: body.orderUrl,
+      newDate: body.newDate,
+      originalDate: body.originalDate,
+      reason: body.reason,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: body.receiverEmail,
+        subject: `You received a delivery extension request from ${body.sellerUsername}`,
+        html,
+      });
+    } catch (error) {
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOrderExtension',
+        error,
+      );
+    }
+  }
+
+  async orderExtensionApprovalRequest(body: {
+    subject: string;
+    buyerUsername: string;
+    sellerUsername: string;
+    orderUrl: string;
+    header: string;
+    message: string;
+    type: string;
+    receiverEmail: string;
+  }) {
+    const html = await renderEmail('OrderExtensionApproval', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      buyerUsername: body.buyerUsername,
+      sellerUsername: body.sellerUsername,
+      orderUrl: body.orderUrl,
+      header: body.header,
+      message: body.message,
+      type: body.type,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: body.receiverEmail,
+        subject: body.subject,
+        html,
+      });
+    } catch (error) {
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOrderPlaced',
+        error,
+      );
+    }
+  }
+
+  async orderDeliveredNotification(body: {
+    buyerUsername: string;
+    sellerUsername: string;
+    orderUrl: string;
+    title: string;
+    receiverEmail: string;
+  }) {
+    const html = await renderEmail('OrderDelivered', {
+      appLink: `${this.configService.getOrThrow('CLIENT_URL')}`,
+      appIcon,
+      buyerUsername: body.buyerUsername,
+      sellerUsername: body.sellerUsername,
+      orderUrl: body.orderUrl,
+      title: body.title,
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: body.receiverEmail,
+        subject: 'Consider it done: Your order is ready for review',
+        html,
+      });
+    } catch (error) {
+      this.logger.log(
+        'error',
+        MailService.name + ' service error at sendOrderPlaced',
+        error,
+      );
+    }
+  }
 }

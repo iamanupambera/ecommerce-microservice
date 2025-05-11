@@ -14,4 +14,28 @@ export class OrderEmailController {
   sendOfferEmail(@Payload('payload') createOrderEmailDto: OfferEmailDto) {
     return this.orderEmailService.sendOfferEmail(createOrderEmailDto);
   }
+
+  @MessagePattern({ controller, cmd: 'sendOrderPlaced' })
+  sendOrderPlaced(@Payload('payload') createOrderEmailDto: any) {
+    return this.orderEmailService.sendOrderPlaced(createOrderEmailDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'sendOrderExtension' })
+  sendOrderExtension(@Payload('payload') createOrderEmailDto: any) {
+    return this.orderEmailService.sendOrderExtension(createOrderEmailDto);
+  }
+
+  @MessagePattern({ controller, cmd: 'orderExtensionApprovalRequest' })
+  orderExtensionApprovalRequest(@Payload('payload') createOrderEmailDto: any) {
+    return this.orderEmailService.orderExtensionApprovalRequest(
+      createOrderEmailDto,
+    );
+  }
+
+  @MessagePattern({ controller, cmd: 'orderDeliveredNotification' })
+  orderDeliveredNotification(@Payload('payload') createOrderEmailDto: any) {
+    return this.orderEmailService.orderDeliveredNotification(
+      createOrderEmailDto,
+    );
+  }
 }

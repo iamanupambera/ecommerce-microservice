@@ -1,5 +1,3 @@
-export const subject = 'Consider it done: Your order is ready for review';
-
 export default function OrderDelivered({
   appLink,
   appIcon,
