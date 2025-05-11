@@ -3,7 +3,15 @@ import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload, LoggerService } from '@repo/modules/index';
 import { OrderRepository } from './order.repository';
-import { createOrderDto, UpdateOrderDto } from '@repo/validator/index';
+import {
+  approveOrderDto,
+  cancelOrderDto,
+  createOrderDto,
+  CreatePaymentIntentDto,
+  OrderDeliveredDto,
+  UpdateOrderDto,
+  UpdateOrderReviewDto,
+} from '@repo/validator/index';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayJwtService } from '../gatewayJwt/gatewayJwt.service';
 
@@ -38,17 +46,7 @@ export class OrderService {
       line2,
       postal_code,
       state,
-    }: {
-      buyerId: string;
-      price: number;
-      name: string;
-      city: string;
-      country: string;
-      line1: string;
-      line2: string;
-      postal_code: string;
-      state: string;
-    },
+    }: CreatePaymentIntentDto,
   ) {
     const { data: customer } = await this.stripe.customers.search({
       query: `email:"${user.email}"`,
@@ -91,7 +89,11 @@ export class OrderService {
     };
   }
 
-  async createOrder(createOrder: createOrderDto, user: AuthJwtPayload) {
+  async createOrder(
+    createOrder: createOrderDto,
+    user: AuthJwtPayload,
+    userToken: string,
+  ) {
     const serviceFee =
       createOrder.price < 50
         ? (5.5 / 100) * createOrder.price + 2
@@ -128,7 +130,7 @@ export class OrderService {
       >(
         { controller: 'seller', cmd: 'createOrder' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
             sellerId: orderData.sellerId,
@@ -160,7 +162,7 @@ export class OrderService {
       >(
         { controller: 'order_email_controller', cmd: 'sendOrderPlaced' },
         {
-          userToken: null,
+          userToken,
           serviceToken:
             await this.gatewayJwtService.generateToken('NOTIFICATION'),
           payload: {
@@ -201,7 +203,7 @@ export class OrderService {
     };
   }
 
-  async orderId(orderId: string) {
+  async findOrderById(orderId: string) {
     const order = await this.orderRepository.getOrderByOrderId(orderId);
     return {
       statusCode: 200,
@@ -210,7 +212,7 @@ export class OrderService {
     };
   }
 
-  async sellerOrders(sellerId: string) {
+  async findOrdersBySellerId(sellerId: string) {
     const orders = await this.orderRepository.getOrdersBySellerId(sellerId);
     return {
       statusCode: 200,
@@ -219,7 +221,7 @@ export class OrderService {
     };
   }
 
-  async buyerOrders(buyerId: string) {
+  async findOrdersByBuyerId(buyerId: string) {
     const orders = await this.orderRepository.getOrdersByBuyerId(buyerId);
     return {
       statusCode: 200,
@@ -230,11 +232,11 @@ export class OrderService {
 
   async requestOrderDeliveryDateExtension(
     body: UpdateOrderDto,
-    orderId: string,
     user: AuthJwtPayload,
+    userToken: string,
   ) {
     const order = await this.orderRepository.requestDeliveryExtension(
-      orderId,
+      body.orderId,
       body,
     );
 
@@ -251,7 +253,7 @@ export class OrderService {
       >(
         { controller: 'order_email_controller', cmd: 'sendOrderExtension' },
         {
-          userToken: null,
+          userToken,
           serviceToken:
             await this.gatewayJwtService.generateToken('NOTIFICATION'),
           payload: {
@@ -260,7 +262,7 @@ export class OrderService {
             originalDate: `${order.offer.oldDeliveryDate}`,
             newDate: `${order.offer.newDeliveryDate}`,
             reason: order.offer.reason,
-            orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${orderId}/activities`,
+            orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${body.orderId}/activities`,
             receiverEmail: order.buyerEmail,
           },
           user,
@@ -289,18 +291,18 @@ export class OrderService {
     };
   }
 
-  async deliveryDate(
+  async changeDeliveryDate(
     body: UpdateOrderDto,
-    orderId: string,
+    userToken: string,
     user: AuthJwtPayload,
   ) {
     const payload = {
-      orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${orderId}/activities`,
+      orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${body.orderId}/activities`,
     };
 
     if (body.type === 'APPROVE') {
       const order = await this.orderRepository.approveDeliveryDate(
-        orderId,
+        body.orderId,
         body,
       );
 
@@ -314,7 +316,7 @@ export class OrderService {
     }
 
     if (body.type === 'REJECT') {
-      const order = await this.orderRepository.rejectDeliveryDate(orderId);
+      const order = await this.orderRepository.rejectDeliveryDate(body.orderId);
       payload['subject'] = 'Sorry: Your extension request was rejected';
       payload['buyerUsername'] = order.buyerUsername.toLowerCase();
       payload['sellerUsername'] = order.sellerUsername.toLowerCase();
@@ -338,7 +340,7 @@ export class OrderService {
           cmd: 'orderExtensionApprovalRequest',
         },
         {
-          userToken: null,
+          userToken,
           serviceToken:
             await this.gatewayJwtService.generateToken('NOTIFICATION'),
           payload,
@@ -369,19 +371,12 @@ export class OrderService {
     };
   }
 
-  async buyerApproveOrder(
-    orderId: string,
-    data: {
-      sellerId: string;
-      buyerId: string;
-      ongoingJobs: string;
-      completedJobs: string;
-      totalEarnings: string;
-      purchasedGigs: string;
-    },
+  async approveOrder(
+    data: approveOrderDto,
     user: AuthJwtPayload,
+    userToken: string,
   ) {
-    const order = await this.orderRepository.approveOrder(orderId);
+    const order = await this.orderRepository.approveOrder(data.orderId);
 
     // update seller info
     this.userService
@@ -396,7 +391,7 @@ export class OrderService {
       >(
         { controller: 'seller', cmd: 'approveOrder' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
             sellerId: data.sellerId,
@@ -432,7 +427,7 @@ export class OrderService {
       >(
         { controller: 'buyer', cmd: 'purchasedGigs' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
             buyerId: data.buyerId,
@@ -465,17 +460,14 @@ export class OrderService {
   }
 
   async deliverOrder(
-    orderId: string,
-    body: {
-      message: string;
-      file: string;
-      fileType: string;
-      fileSize: string;
-      fileName: string;
-    },
+    body: OrderDeliveredDto,
     user: AuthJwtPayload,
+    userToken: string,
   ) {
-    const order = await this.orderRepository.sellerDeliverOrder(orderId, body);
+    const order = await this.orderRepository.sellerDeliverOrder(
+      body.orderId,
+      body,
+    );
 
     // send email
     this.notificationService
@@ -493,14 +485,14 @@ export class OrderService {
           cmd: 'orderDeliveredNotification',
         },
         {
-          userToken: null,
+          userToken,
           serviceToken:
             await this.gatewayJwtService.generateToken('NOTIFICATION'),
           payload: {
             buyerUsername: order.buyerUsername.toLowerCase(),
             sellerUsername: order.sellerUsername.toLowerCase(),
             title: order.offer.gigTitle,
-            orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${orderId}/activities`,
+            orderUrl: `${this.configService.getOrThrow('CLIENT_URL')}/orders/${body.orderId}/activities`,
             receiverEmail: order.buyerEmail,
           },
           user,
@@ -524,13 +516,24 @@ export class OrderService {
     };
   }
 
-  async remove(
-    body: {
-      orderId: string;
-      orderData: { sellerId: string; buyerId: string; purchasedGigs: string };
-      paymentIntent: string;
-    },
+  async updateOrderReview(body: UpdateOrderReviewDto) {
+    const order = await this.orderRepository.updateOrderReview(body);
+    sendNotification(
+      order,
+      body.type === 'buyer-review' ? order.sellerUsername : order.buyerUsername,
+      `left you a ${body.rating} star review`,
+    );
+    return {
+      statusCode: 200,
+      response: order,
+      message: 'review update successfully.',
+    };
+  }
+
+  async cancelOrder(
+    body: cancelOrderDto,
     user: AuthJwtPayload,
+    userToken: string,
   ) {
     await this.stripe.refunds.create({
       payment_intent: `${body.paymentIntent}`,
@@ -549,10 +552,10 @@ export class OrderService {
       >(
         { controller: 'seller', cmd: 'cancelOrder' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
-            sellerId: body.orderData.sellerId,
+            sellerId: body.sellerId,
           },
           user,
         },
@@ -580,12 +583,12 @@ export class OrderService {
       >(
         { controller: 'buyer', cmd: 'purchasedGigs' },
         {
-          userToken: null,
+          userToken,
           serviceToken: await this.gatewayJwtService.generateToken('USER'),
           payload: {
             type: 'cancel-order',
-            buyerId: body.orderData.buyerId,
-            purchasedGigs: body.orderData.purchasedGigs,
+            buyerId: body.buyerId,
+            purchasedGigs: body.purchasedGigs,
           },
           user,
         },
@@ -609,25 +612,6 @@ export class OrderService {
       statusCode: 200,
       response: order,
       message: 'Order cancelled successfully.',
-    };
-  }
-
-  async updateOrderReview(body: {
-    rating: number;
-    review: string;
-    orderId: string;
-    type: 'buyer-review' | 'seller-review';
-  }) {
-    const order = await this.orderRepository.updateOrderReview(body);
-    sendNotification(
-      order,
-      body.type === 'buyer-review' ? order.sellerUsername : order.buyerUsername,
-      `left you a ${body.rating} star review`,
-    );
-    return {
-      statusCode: 200,
-      response: order,
-      message: 'review update successfully.',
     };
   }
 }

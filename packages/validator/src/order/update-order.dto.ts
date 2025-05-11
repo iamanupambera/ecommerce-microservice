@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsEnum,
+  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -8,6 +9,10 @@ import {
 } from 'class-validator';
 
 export class UpdateOrderDto {
+  @IsNotEmpty()
+  @IsMongoId()
+  orderId: string;
+
   @IsNotEmpty()
   @IsString()
   originalDate: string;

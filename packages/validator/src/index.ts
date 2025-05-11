@@ -45,4 +45,12 @@ export {
 
 export { ChatMessageDto, MessageEventDto } from './web-socket';
 
-export { createOrderDto, UpdateOrderDto } from './order';
+export {
+  createOrderDto,
+  UpdateOrderDto,
+  CreatePaymentIntentDto,
+  approveOrderDto,
+  OrderDeliveredDto,
+  cancelOrderDto,
+  UpdateOrderReviewDto,
+} from './order';
