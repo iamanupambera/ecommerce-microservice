@@ -33,7 +33,7 @@ export class GatewayJwtService {
         serviceName: keyof typeof ServiceNameENUM;
       }>(token);
 
-      return data.serviceName === 'AUTH';
+      return data.serviceName === 'ORDER';
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return false;

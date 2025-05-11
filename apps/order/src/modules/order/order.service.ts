@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload, LoggerService } from '@repo/modules/index';
@@ -28,6 +28,7 @@ export class OrderService {
     private readonly notificationService: ClientProxy,
     private readonly gatewayJwtService: GatewayJwtService,
     private readonly logger: LoggerService,
+    @Inject(forwardRef(() => NotificationService))
     private readonly orderNotificationService: NotificationService,
   ) {
     this.stripe = new Stripe(this.configService.getOrThrow('STRIPE_API_KEY'), {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -10,7 +10,7 @@ import { NotificationModule } from '../notification/notification.module';
 @Module({
   imports: [
     PrismaModule,
-    NotificationModule,
+    forwardRef(() => NotificationModule),
     ClientsModule.registerAsync([
       {
         name: 'USER_SERVICE',

@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthJwtPayload } from '@repo/modules/index';
@@ -11,9 +11,11 @@ import {
   UpdateOrderDto,
   UpdateOrderReviewDto,
 } from '@repo/validator/index';
-const controller = '';
+import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+const controller = 'order';
 
 @Controller()
+@UseGuards(GatewayJwtGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
