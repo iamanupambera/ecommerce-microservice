@@ -92,8 +92,12 @@ export class OrderController {
   }
 
   @MessagePattern({ controller, cmd: 'updateOrderReview' })
-  async updateOrderReview(@Payload('payload') body: UpdateOrderReviewDto) {
-    return this.orderService.updateOrderReview(body);
+  async updateOrderReview(
+    @Payload('payload') body: UpdateOrderReviewDto,
+    @Payload('user') user: AuthJwtPayload,
+    @Payload('userToken') userToken: string,
+  ) {
+    return this.orderService.updateOrderReview(body, user, userToken);
   }
 
   @MessagePattern({ controller, cmd: 'cancelOrder' })

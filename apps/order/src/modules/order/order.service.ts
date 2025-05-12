@@ -193,15 +193,19 @@ export class OrderService {
         },
       });
 
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo: order.sellerUsername,
-      message: 'placed an order for your gig.',
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.sellerUsername,
+        message: 'placed an order for your gig.',
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 201,
@@ -285,15 +289,19 @@ export class OrderService {
         },
       });
 
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo: order.buyerUsername,
-      message: 'requested for an order delivery date extension.',
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.buyerUsername,
+        message: 'requested for an order delivery date extension.',
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 200,
@@ -336,15 +344,19 @@ export class OrderService {
       payload['message'] = 'You can contact the buyer for more information.';
 
       // send notification
-      await this.orderNotificationService.sendNotification({
-        orderId: order.id,
-        senderUsername: order.sellerUsername,
-        senderPicture: order.sellerImage,
-        receiverUsername: order.buyerUsername,
-        receiverPicture: order.buyerImage,
-        userTo: order.sellerUsername,
-        message: 'rejected your order delivery date extension request.',
-      });
+      await this.orderNotificationService.sendNotification(
+        {
+          orderId: order.id,
+          senderUsername: order.sellerUsername,
+          senderPicture: order.sellerImage,
+          receiverUsername: order.buyerUsername,
+          receiverPicture: order.buyerImage,
+          userTo: order.sellerUsername,
+          message: 'rejected your order delivery date extension request.',
+        },
+        user,
+        userToken,
+      );
     }
 
     // send email
@@ -462,15 +474,19 @@ export class OrderService {
         },
       });
 
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo: order.sellerUsername,
-      message: 'approved your order delivery.',
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.sellerUsername,
+        message: 'approved your order delivery.',
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 200,
@@ -528,15 +544,19 @@ export class OrderService {
         },
       });
 
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo: order.buyerUsername,
-      message: 'delivered your order.',
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.buyerUsername,
+        message: 'delivered your order.',
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 200,
@@ -545,20 +565,28 @@ export class OrderService {
     };
   }
 
-  async updateOrderReview(body: UpdateOrderReviewDto) {
+  async updateOrderReview(
+    body: UpdateOrderReviewDto,
+    user: AuthJwtPayload,
+    userToken: string,
+  ) {
     const order = await this.orderRepository.updateOrderReview(body);
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo:
-        body.type === 'buyer-review'
-          ? order.sellerUsername
-          : order.buyerUsername,
-      message: `left you a ${body.rating} star review`,
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo:
+          body.type === 'buyer-review'
+            ? order.sellerUsername
+            : order.buyerUsername,
+        message: `left you a ${body.rating} star review`,
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 200,
@@ -640,15 +668,19 @@ export class OrderService {
         },
       });
 
-    await this.orderNotificationService.sendNotification({
-      orderId: order.id,
-      senderUsername: order.sellerUsername,
-      senderPicture: order.sellerImage,
-      receiverUsername: order.buyerUsername,
-      receiverPicture: order.buyerImage,
-      userTo: order.sellerUsername,
-      message: 'cancelled your order delivery.',
-    });
+    await this.orderNotificationService.sendNotification(
+      {
+        orderId: order.id,
+        senderUsername: order.sellerUsername,
+        senderPicture: order.sellerImage,
+        receiverUsername: order.buyerUsername,
+        receiverPicture: order.buyerImage,
+        userTo: order.sellerUsername,
+        message: 'cancelled your order delivery.',
+      },
+      user,
+      userToken,
+    );
 
     return {
       statusCode: 200,

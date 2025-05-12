@@ -6,31 +6,20 @@ import { OrderConsumerService } from './order-consumer.service';
 export class OrderConsumerController {
   constructor(private readonly orderConsumerService: OrderConsumerService) {}
 
-  @MessagePattern('createOrderConsumer')
-  create(@Payload() createOrderConsumerDto: any) {
-    return this.orderConsumerService.create(createOrderConsumerDto);
-  }
-
-  @MessagePattern('findAllOrderConsumer')
-  findAll() {
-    return this.orderConsumerService.findAll();
-  }
-
-  @MessagePattern('findOneOrderConsumer')
-  findOne(@Payload() id: number) {
-    return this.orderConsumerService.findOne(id);
-  }
-
-  @MessagePattern('updateOrderConsumer')
-  update(@Payload() updateOrderConsumerDto: any) {
-    return this.orderConsumerService.update(
-      updateOrderConsumerDto.id,
-      updateOrderConsumerDto,
+  @MessagePattern({
+    controller: 'order-consumer',
+    cmd: 'sendOrderNotification',
+  })
+  sendOrderNotification(
+    @Payload('payload')
+    body: {
+      notification: { userTo: string };
+      order: object;
+    },
+  ) {
+    return this.orderConsumerService.sendOrderNotification(
+      body.notification,
+      body.order,
     );
-  }
-
-  @MessagePattern('removeOrderConsumer')
-  remove(@Payload() id: number) {
-    return this.orderConsumerService.remove(id);
   }
 }

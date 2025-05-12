@@ -1,24 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { StoresService } from '../stores/stores.service';
 
 @Injectable()
 export class OrderConsumerService {
-  create(createOrderConsumerDto: any) {
-    return createOrderConsumerDto;
-  }
+  constructor(private readonly storesService: StoresService) {}
 
-  findAll() {
-    return `This action returns all orderConsumer`;
-  }
+  sendOrderNotification(notification: { userTo: string }, order: object) {
+    const client = this.storesService.getClientByDetails(notification.userTo);
+    if (!client) {
+      return;
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} orderConsumer`;
-  }
-
-  update(id: number, updateOrderConsumerDto: any) {
-    return updateOrderConsumerDto;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} orderConsumer`;
+    client.send(
+      JSON.stringify({
+        event: 'order notification',
+        data: { response: { notification, order } },
+      }),
+    );
   }
 }

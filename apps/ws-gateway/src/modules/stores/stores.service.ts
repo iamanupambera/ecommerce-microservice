@@ -9,15 +9,26 @@ export class StoresService {
     { details: AuthJwtPayload; channels: Set<string> }
   >();
   private readonly channelStore = new Map<string, Set<WebSocket>>();
+  private readonly loginStore = new Map<string, WebSocket>();
 
   getUserChannels(client: WebSocket): Set<string> | undefined {
     return this.userStore.get(client)?.channels;
   }
 
   addClient(client: WebSocket, details: AuthJwtPayload) {
-    if (!this.userStore.has(client)) {
-      this.userStore.set(client, { channels: new Set(), details });
+    const uniqueKey = details.username;
+    if (this.loginStore.has(uniqueKey)) {
+      return false;
     }
+
+    this.userStore.set(client, { channels: new Set(), details });
+    this.loginStore.set(uniqueKey, client);
+    return true;
+  }
+
+  getClientByDetails(username: string): WebSocket | undefined {
+    const uniqueKey = username;
+    return this.loginStore.get(uniqueKey);
   }
 
   addUserToChannel(client: WebSocket, channel: string): void {
@@ -48,6 +59,7 @@ export class StoresService {
   }
 
   removeClient(client: WebSocket) {
+    const details = this.userStore.get(client)?.details;
     const channels = this.userStore.get(client)?.channels;
     if (channels) {
       for (const channel of channels) {
@@ -58,16 +70,13 @@ export class StoresService {
       }
     }
 
-    const data = this.userStore.get(client)?.details;
+    if (details) {
+      const uniqueKey = details.username;
+      this.loginStore.delete(uniqueKey);
+    }
+
     this.userStore.delete(client);
 
-    return data;
-  }
-
-  getAllState() {
-    return {
-      userStore: this.userStore,
-      channelStore: this.channelStore,
-    };
+    return details;
   }
 }

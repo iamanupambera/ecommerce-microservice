@@ -16,7 +16,15 @@ export class NotificationController {
   }
 
   @MessagePattern({ controller, cmd: 'updateNotification' })
-  update(@Payload() updateNotificationDto: { id: string }) {
-    return this.notificationService.update(updateNotificationDto.id);
+  update(
+    @Payload('payload') updateNotificationDto: { id: string },
+    @Payload('user') user: AuthJwtPayload,
+    @Payload('userToken') userToken: string,
+  ) {
+    return this.notificationService.update(
+      updateNotificationDto.id,
+      user,
+      userToken,
+    );
   }
 }
