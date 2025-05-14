@@ -579,7 +579,7 @@ export class OrderService {
         receiverUsername: order.buyerUsername,
         receiverPicture: order.buyerImage,
         userTo:
-          body.type === 'buyer-review'
+          body.type === 'buyerReview'
             ? order.sellerUsername
             : order.buyerUsername,
         message: `left you a ${body.rating} star review`,

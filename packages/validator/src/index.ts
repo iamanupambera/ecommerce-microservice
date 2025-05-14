@@ -58,3 +58,5 @@ export {
   cancelOrderDto,
   UpdateOrderReviewDto,
 } from './order';
+
+export { CreateReviewDto } from './review';

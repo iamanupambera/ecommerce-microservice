@@ -166,13 +166,13 @@ export class OrderRepository {
   async updateOrderReview(
     data: Prisma.ReviewCreateInput & {
       orderId: string;
-      type: 'buyer-review' | 'seller-review';
+      type: 'buyerReview' | 'sellerReview';
     },
   ) {
     return this.dbWrite.prisma.order.update({
       where: { orderId: data.orderId },
       data:
-        data.type === 'buyer-review'
+        data.type === 'buyerReview'
           ? {
               buyerReview: {
                 create: {

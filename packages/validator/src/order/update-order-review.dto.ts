@@ -20,6 +20,6 @@ export class UpdateOrderReviewDto {
   review: string;
 
   @IsNotEmpty()
-  @IsEnum(['buyer-review', 'seller-review'])
-  type: 'buyer-review' | 'seller-review';
+  @IsEnum(['buyerReview', 'sellerReview'])
+  type: 'buyerReview' | 'sellerReview';
 }
