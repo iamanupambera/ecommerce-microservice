@@ -8,6 +8,9 @@ import { GigModule } from './modules/gig/gig.module';
 import { SellerModule } from './modules/seller/seller.module';
 import { BuyerModule } from './modules/buyer/buyer.module';
 import { LoggerModule } from '@repo/modules/index';
+import { ChatModule } from './modules/chat/chat.module';
+import { OrderModule } from './modules/order/order.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { LoggerModule } from '@repo/modules/index';
     GigModule,
     SellerModule,
     BuyerModule,
+    ChatModule,
+    OrderModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

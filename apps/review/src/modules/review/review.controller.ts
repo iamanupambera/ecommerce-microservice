@@ -4,13 +4,14 @@ import { ReviewService } from './review.service';
 import { CreateReviewDto } from '@repo/validator/index';
 import { AuthJwtPayload } from '@repo/modules/index';
 import { GatewayJwtGuard } from 'src/shared/gatewayJwt.guard';
+const controller = 'review';
 
 @Controller()
 @UseGuards(GatewayJwtGuard)
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  @MessagePattern('createReview')
+  @MessagePattern({ controller, cmd: 'create' })
   create(
     @Payload() createReviewDto: CreateReviewDto,
     @Payload('user') user: AuthJwtPayload,
@@ -19,13 +20,13 @@ export class ReviewController {
     return this.reviewService.create(createReviewDto, user, userToken);
   }
 
-  @MessagePattern('reviewsByGigId')
-  reviewsByGigId() {
-    return this.reviewService.reviewsByGigId('');
+  @MessagePattern({ controller, cmd: 'reviewsByGigId' })
+  reviewsByGigId(@Payload('payload') { gigId }: { gigId: string }) {
+    return this.reviewService.reviewsByGigId(gigId);
   }
 
-  @MessagePattern('reviewsBySellerId')
-  reviewsBySellerId() {
-    return this.reviewService.reviewsBySellerId('');
+  @MessagePattern({ controller, cmd: 'reviewsBySellerId' })
+  reviewsBySellerId(@Payload('payload') { sellerId }: { sellerId: string }) {
+    return this.reviewService.reviewsBySellerId(sellerId);
   }
 }

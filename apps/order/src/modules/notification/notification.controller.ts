@@ -10,12 +10,12 @@ const controller = 'notification';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @MessagePattern({ controller, cmd: 'findAllNotification' })
-  findAll(@Payload('user') user: AuthJwtPayload) {
-    return this.notificationService.findAll(user.username);
+  @MessagePattern({ controller, cmd: 'findAll' })
+  findAll(@Payload('payload') body: { userTo: string }) {
+    return this.notificationService.findAll(body.userTo);
   }
 
-  @MessagePattern({ controller, cmd: 'updateNotification' })
+  @MessagePattern({ controller, cmd: 'update' })
   update(
     @Payload('payload') updateNotificationDto: { id: string },
     @Payload('user') user: AuthJwtPayload,

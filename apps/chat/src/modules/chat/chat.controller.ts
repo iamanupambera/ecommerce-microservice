@@ -39,8 +39,8 @@ export class ChatController {
   }
 
   @MessagePattern({ controller, cmd: 'getUserConversationList' })
-  getUserConversationList() {
-    return this.chatService.getUserConversationList('');
+  getUserConversationList(@Payload('payload') body: { username: string }) {
+    return this.chatService.getUserConversationList(body.username);
   }
 
   @MessagePattern({ controller, cmd: 'getUserMessages' })
