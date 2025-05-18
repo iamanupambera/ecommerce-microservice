@@ -1,0 +1,15 @@
+# Ignore node_modules and build directories
+node_modules/
+dist/
+elasticsearchData/
+
+# Ignore specific types of files globally
+*.json
+
+# Allow ESLint configuration files and other important JS files
+.eslintrc.js
+.prettierrc.js
+**/eslint-config/*.js
+
+# Ignore Docker-specific files
+docker-compose.yml

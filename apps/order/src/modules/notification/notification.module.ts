@@ -24,6 +24,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             queueOptions: {
               durable: false,
             },
+            exchange: configService.getOrThrow('WS_GATEWAY_SERVICE_EXCHANGE'),
+            exchangeType: 'fanout',
           },
         }),
       },

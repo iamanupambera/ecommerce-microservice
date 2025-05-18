@@ -2,6 +2,7 @@
 node_modules/
 dist/
 elasticsearchData/
+client/
 
 # Ignore specific types of files globally
 *.json

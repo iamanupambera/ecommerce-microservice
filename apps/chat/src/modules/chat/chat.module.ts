@@ -43,6 +43,8 @@ import { PrismaModule } from '../prisma/prisma.module';
             queueOptions: {
               durable: false,
             },
+            exchange: configService.getOrThrow('WS_GATEWAY_SERVICE_EXCHANGE'),
+            exchangeType: 'fanout',
           },
         }),
       },

@@ -6,8 +6,12 @@ export {
 
 export { RedisModule, RedisService } from './redis';
 
-export { ExceptionFilter } from './filter/index';
+export { ExceptionFilter } from './filter';
 
-export { ServiceNameENUM, type AuthJwtPayload } from './shared/index';
+export {
+  ServiceNameENUM,
+  type AuthJwtPayload,
+  setupFanoutListener,
+} from './shared';
 
-export { CommonErrors } from './errors/index';
+export { CommonErrors } from './errors';
