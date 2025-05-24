@@ -1,5 +1,3 @@
 export default function HeaderSideBar() {
-  return (
-    <div>HeaderSideBar</div>
-  )
+  return <div>HeaderSideBar</div>;
 }

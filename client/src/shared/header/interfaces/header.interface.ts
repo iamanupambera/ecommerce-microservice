@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction } from 'react';
-import { IAuthUser } from '../../../modules/auth/interfaces/auth.interface';
-import { IBuyerDocument } from '../../../modules/buyer/interfaces/buyer.interface';
-import { ISellerDocument } from '../../../modules/sellers/interfaces/seller.interface';
+import type { IAuthUser } from '../../../modules/auth/interfaces/auth.interface';
+import type { IBuyerDocument } from '../../../modules/buyer/interfaces/buyer.interface';
+import type { ISellerDocument } from '../../../modules/sellers/interfaces/seller.interface';
 
 export interface IReduxHeader {
   type: string;

@@ -12,7 +12,7 @@ export default function Index() {
       <Hero />
       <GigTabs />
       <HowItWorks />
-      <Categories/>
+      <Categories />
     </div>
   );
 }

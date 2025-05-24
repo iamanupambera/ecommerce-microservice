@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useDeviceData, useMobileOrientation } from 'react-device-detect';
 import {
   FaCamera,
   FaChevronLeft,
@@ -12,23 +13,87 @@ import ModalBg from '../../../shared/modals/ModalBg';
 import Button from '../../../shared/button/Button';
 import Alert from '../../../shared/alert/Alert';
 import Dropdown from '../../../shared/dropdown/Dropdown';
+import { useAppDispatch } from '../../../store/store';
+import type { ISignUpPayload } from '../interfaces/auth.interface';
+import { useAuthSchema } from '../hooks/useAuthSchema';
+import { useSignUpMutation } from '../services/auth.service';
+import { registerUserSchema } from '../schemas/auth.schema';
+import {
+  checkImage,
+  readAsBase64,
+} from '../../../shared/utils/image-utils.service';
+import type { IResponse } from '../../../shared/shared.interface';
+import {
+  saveToSessionStorage,
+  countriesList,
+} from '../../../shared/utils/utils.service';
+import { addAuthUser } from '../reducers/auth.reducer';
+import { updateLogout } from '../reducers/logout.reducer';
+import { updateHeader } from '../../../shared/header/reducers/header.reducer';
+import { updateCategoryContainer } from '../../../shared/header/reducers/category.reducer';
 
 export default function Register({ onClose, onToggle }: IModalBgProps) {
+  const mobileOrientation = useMobileOrientation();
+  const deviceData = useDeviceData(window.navigator.userAgent);
   const [step, setStep] = useState(1);
-  const [alertMessage] = useState('');
-  const [country, setCountry] = useState<string>('Select Country');
-  const [passwordType, setPasswordType] = useState<string>('password');
-  const [profileImage] = useState<string>(
+  const [alertMessage, setAlertMessage] = useState('');
+  const [country, setCountry] = useState('Select Country');
+  const [passwordType, setPasswordType] = useState('password');
+  const [profileImage, setProfileImage] = useState(
     'https://placehold.co/330x220?text=Profile+Image',
   );
-  const [showImageSelect, setShowImageSelect] = useState<boolean>(false);
+  const [showImageSelect, setShowImageSelect] = useState(false);
+  const [userInfo, setUserInfo] = useState<ISignUpPayload>({
+    username: '',
+    password: '',
+    email: '',
+    country: '',
+    profilePicture: '',
+    browserName: deviceData.browser.name,
+    deviceType: mobileOrientation.isLandscape ? 'browser' : 'mobile',
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const [schemaValidation] = useAuthSchema({
+    schema: registerUserSchema,
+    userInfo,
+  });
+  const [signUp, { isLoading }] = useSignUpMutation();
 
   async function handleFileChange(event: React.ChangeEvent): Promise<void> {
-    console.log(event.target);
+    const target: HTMLInputElement = event.target as HTMLInputElement;
+    if (target.files) {
+      const file: File = target.files[0];
+      const isValid = checkImage(file, 'image');
+      if (isValid) {
+        const dataImage: string | ArrayBuffer | null = await readAsBase64(file);
+        setProfileImage(`${dataImage}`);
+        setUserInfo({ ...userInfo, profilePicture: `${dataImage}` });
+      }
+      setShowImageSelect(false);
+    }
   }
 
-  async function onRegisterUser(): Promise<void> {}
+  async function onRegisterUser(): Promise<void> {
+    try {
+      const isValid: boolean = await schemaValidation();
+      if (isValid) {
+        const result: IResponse = await signUp(userInfo).unwrap();
+        setAlertMessage('');
+        dispatch(addAuthUser({ authInfo: result.user }));
+        dispatch(updateLogout(false));
+        dispatch(updateHeader('home'));
+        dispatch(updateCategoryContainer(true));
+        saveToSessionStorage(
+          JSON.stringify(true),
+          JSON.stringify(result.user?.username),
+          JSON.stringify(result.token),
+        );
+      }
+    } catch (error: any) {
+      setAlertMessage(error?.data.message);
+    }
+  }
 
   return (
     <ModalBg>
@@ -91,9 +156,15 @@ export default function Register({ onClose, onToggle }: IModalBgProps) {
                 id="username"
                 name="username"
                 type="text"
+                value={userInfo.username}
                 className="mb-5 mt-2 flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
                 placeholder="Enter username"
-                onChange={() => {}}
+                onChange={(event: React.ChangeEvent) => {
+                  setUserInfo({
+                    ...userInfo,
+                    username: (event.target as HTMLInputElement).value,
+                  });
+                }}
               />
             </div>
             <div>
@@ -107,9 +178,15 @@ export default function Register({ onClose, onToggle }: IModalBgProps) {
                 id="email"
                 name="email"
                 type="email"
+                value={userInfo.email}
                 className="mb-5 mt-2 flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
                 placeholder="Enter email"
-                onChange={() => {}}
+                onChange={(event: React.ChangeEvent) => {
+                  setUserInfo({
+                    ...userInfo,
+                    email: (event.target as HTMLInputElement).value,
+                  });
+                }}
               />
             </div>
             <div>
@@ -137,14 +214,27 @@ export default function Register({ onClose, onToggle }: IModalBgProps) {
                   id="password"
                   name="password"
                   type={passwordType}
+                  value={userInfo.password}
                   className="flex h-10 w-full items-center rounded border border-gray-300 pl-3 text-sm font-normal text-gray-600 focus:border focus:border-sky-500/50 focus:outline-none"
                   placeholder="Enter password"
-                  onChange={() => {}}
+                  onChange={(event: React.ChangeEvent) => {
+                    setUserInfo({
+                      ...userInfo,
+                      password: (event.target as HTMLInputElement).value,
+                    });
+                  }}
                 />
               </div>
             </div>
             <Button
-              className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none`}
+              disabled={
+                !userInfo.username || !userInfo.email || !userInfo.password
+              }
+              className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none ${
+                !userInfo.username || !userInfo.email || !userInfo.password
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
+              }`}
               label="Continue"
               onClick={() => setStep(2)}
             />
@@ -166,10 +256,11 @@ export default function Register({ onClose, onToggle }: IModalBgProps) {
                   maxHeight="200"
                   mainClassNames="absolute bg-white z-50"
                   showSearchInput={true}
-                  values={[]}
+                  values={countriesList()}
                   setValue={setCountry}
                   onClick={(item: string) => {
                     setCountry(item);
+                    setUserInfo({ ...userInfo, country: item });
                   }}
                 />
               </div>
@@ -220,8 +311,13 @@ export default function Register({ onClose, onToggle }: IModalBgProps) {
               </div>
             </div>
             <Button
-              className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none`}
-              label={'SIGNUP'}
+              disabled={!userInfo.country || !userInfo.profilePicture}
+              className={`text-md block w-full cursor-pointer rounded bg-sky-500 px-8 py-2 text-center font-bold text-white hover:bg-sky-400 focus:outline-none ${
+                !userInfo.country || !userInfo.profilePicture
+                  ? 'cursor-not-allowed'
+                  : 'cursor-pointer'
+              }`}
+              label={`${isLoading ? 'SIGNUP IN PROGRESS...' : 'SIGNUP'}`}
               onClick={onRegisterUser}
             />
           </div>

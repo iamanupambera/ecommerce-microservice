@@ -21,6 +21,8 @@ import {
   useSelector,
   type TypedUseSelectorHook,
 } from 'react-redux';
+import authReducer from '../modules/auth/reducers/auth.reducer';
+import logoutReducer from '../modules/auth/reducers/logout.reducer';
 
 const persistConfig = {
   key: 'root',
@@ -30,8 +32,8 @@ const persistConfig = {
 
 export const combineReducer = combineReducers({
   [api.reducerPath]: api.reducer,
-  // authUser: authReducer,
-  // logout: logoutReducer,
+  authUser: authReducer,
+  logout: logoutReducer,
   // buyer: buyerReducer,
   // seller: sellerReducer,
   // header: headerReducer,
@@ -59,6 +61,7 @@ export const store: Store = configureStore({
       },
     }).concat(api.middleware),
 });
+
 setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;

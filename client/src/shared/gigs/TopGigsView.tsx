@@ -1,5 +1,3 @@
 export default function TopGigsView() {
-  return (
-    <div>TopGigsView</div>
-  )
+  return <div>TopGigsView</div>;
 }

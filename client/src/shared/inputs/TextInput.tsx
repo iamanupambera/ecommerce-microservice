@@ -6,11 +6,5 @@ export default function TextInput({
 }: ITextInputProps & {
   ref?: React.RefObject<HTMLInputElement | null>;
 }) {
-  return (
-    <input
-      ref={ref}
-      autoComplete="false"
-      {...props}
-    />
-  );
+  return <input ref={ref} autoComplete="false" {...props} />;
 }
